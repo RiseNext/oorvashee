@@ -1,26 +1,204 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
+@custom-variant dark (&:is(.dark *));
+
+/* ---------------------------------------------------------------------------
+   Oorvashee Design Tokens (source: docs/UI.md)
+   --------------------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Backgrounds */
+  --bg-primary: #f0e6d3;
+  --bg-secondary: #faf6f1;
+  --bg-card: #ffffff;
+  --bg-dark: #2a1308;
+  --bg-dark-deep: #1e0c06;
+
+  /* Text */
+  --text-primary: #3d1a08;
+  --text-secondary: #6b4226;
+  --text-muted: #9a7055;
+  --text-on-dark: #ffffff;
+  --text-on-dark-muted: #d4b896;
+
+  /* Brand */
+  --gold: #c4982a;
+  --gold-light: #e8c96a;
+  --cta-fill: #7a4b15;
+  --cta-fill-hover: #5e3810;
+
+  /* Borders */
+  --border-default: #e5d5bc;
+  --border-focus: #7a4b15;
+  --border-light: #f0e0cc;
+
+  /* UI states */
+  --star-fill: #c4982a;
+  --star-empty: #e0cdb0;
+  --badge-bg: #f5ead8;
+  --badge-text: #7a4b15;
+
+  /* shadcn primitives mapped onto brand tokens */
+  --background: var(--bg-primary);
+  --foreground: var(--text-primary);
+  --card: var(--bg-card);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-card);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--cta-fill);
+  --primary-foreground: #ffffff;
+  --secondary: var(--bg-secondary);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--bg-secondary);
+  --muted-foreground: var(--text-muted);
+  --accent: var(--badge-bg);
+  --accent-foreground: var(--badge-text);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: var(--border-default);
+  --input: var(--border-default);
+  --ring: var(--border-focus);
+  --chart-1: var(--gold);
+  --chart-2: var(--cta-fill);
+  --chart-3: var(--text-secondary);
+  --chart-4: var(--text-muted);
+  --chart-5: var(--bg-dark);
+  --radius: 0.5rem;
+  --sidebar: var(--bg-secondary);
+  --sidebar-foreground: var(--text-primary);
+  --sidebar-primary: var(--cta-fill);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--badge-bg);
+  --sidebar-accent-foreground: var(--badge-text);
+  --sidebar-border: var(--border-default);
+  --sidebar-ring: var(--border-focus);
+}
+
+.dark {
+  --background: var(--bg-dark);
+  --foreground: var(--text-on-dark);
+  --card: var(--bg-dark-deep);
+  --card-foreground: var(--text-on-dark);
+  --popover: var(--bg-dark-deep);
+  --popover-foreground: var(--text-on-dark);
+  --primary: var(--gold);
+  --primary-foreground: var(--bg-dark);
+  --secondary: #3a1a08;
+  --secondary-foreground: var(--text-on-dark);
+  --muted: #3a1a08;
+  --muted-foreground: var(--text-on-dark-muted);
+  --accent: #3a1a08;
+  --accent-foreground: var(--text-on-dark);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: var(--gold);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-body);
+  --font-heading: var(--font-display);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  /* Brand-named utilities — use bg-bg-primary, text-text-primary, text-gold, etc. */
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-card: var(--bg-card);
+  --color-bg-dark: var(--bg-dark);
+  --color-bg-dark-deep: var(--bg-dark-deep);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-on-dark: var(--text-on-dark);
+  --color-text-on-dark-muted: var(--text-on-dark-muted);
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-cta-fill: var(--cta-fill);
+  --color-cta-fill-hover: var(--cta-fill-hover);
+  --color-border-default: var(--border-default);
+  --color-border-focus: var(--border-focus);
+  --color-border-light: var(--border-light);
+  --color-star-fill: var(--star-fill);
+  --color-star-empty: var(--star-empty);
+  --color-badge-bg: var(--badge-bg);
+  --color-badge-text: var(--badge-text);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer utilities {
+  /* Horizontal scroll containers (mobile product strips, tab rows)
+     should hide their scrollbars while remaining functional. */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-body;
+  }
+  html {
+    @apply font-body;
+  }
+  h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  ::selection {
+    background: var(--cta-fill);
+    color: #ffffff;
+  }
 }
