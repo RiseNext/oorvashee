@@ -52,6 +52,7 @@ export const siteConfig = {
       ],
     },
     { label: "New Arrivals", href: "/new-arrivals" },
+    { label: "Video", href: "/video" },
     { label: "About Us", href: "/about" },
     { label: "Contact", href: "/contact" },
   ] satisfies NavItem[],

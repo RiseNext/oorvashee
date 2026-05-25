@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 
 interface NavDropdownProps {
   item: NavItem;
+  triggerClassName?: string;
 }
 
 function matchesHref(pathname: string, href: string): boolean {
@@ -26,7 +27,7 @@ function isBranchActive(pathname: string | null, item: NavItem): boolean {
   return Boolean(item.children?.some((c) => isBranchActive(pathname, c)));
 }
 
-export function NavDropdown({ item }: NavDropdownProps) {
+export function NavDropdown({ item, triggerClassName }: NavDropdownProps) {
   const pathname = usePathname();
   const active = isBranchActive(pathname, item);
   const children = item.children ?? [];
@@ -37,6 +38,7 @@ export function NavDropdown({ item }: NavDropdownProps) {
         className={cn(
           "group/saris relative inline-flex items-center gap-1.5 py-2 text-[13.5px] font-medium tracking-[0.04em] outline-none transition-colors duration-300 ease-out focus-visible:text-gold",
           active ? "text-gold" : "text-text-primary hover:text-gold",
+          triggerClassName,
           "after:absolute after:-bottom-0.5 after:left-1/2 after:h-px after:-translate-x-1/2 after:rounded-full after:bg-gradient-to-r after:from-transparent after:via-gold after:to-transparent after:transition-[width,opacity] after:duration-400 after:ease-out",
           active
             ? "after:w-8 after:opacity-100"
