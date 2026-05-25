@@ -61,7 +61,7 @@ export function ProductCard({
           src={image}
           alt={`${code} ${name}`}
           fill
-          sizes="(min-width: 1024px) 18vw, (min-width: 640px) 32vw, 65vw"
+          sizes="(min-width: 1536px) 15vw, (min-width: 1280px) 18vw, (min-width: 640px) 32vw, 65vw"
           className="object-cover transition-transform duration-[900ms] ease-out group-hover/product:scale-[1.045]"
         />
 
@@ -98,13 +98,13 @@ export function ProductCard({
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-1.5 px-3.5 py-3 sm:px-4 sm:py-3.5">
-        <p className="line-clamp-1 font-body text-[13px] font-normal text-text-primary sm:text-sm">
+      <div className="flex flex-1 flex-col gap-1.5 px-3.5 py-3 sm:px-4 sm:py-3.5 lg:px-5 lg:py-4">
+        <p className="line-clamp-1 font-body text-[13px] font-normal text-text-primary sm:text-sm lg:text-base">
           <span className="text-text-secondary">{code}</span>{" "}
           <span>{name}</span>
         </p>
         <div className="flex items-baseline gap-2">
-          <span className="font-body text-sm font-medium text-cta-fill sm:text-[15px]">
+          <span className="font-body text-sm font-medium text-cta-fill sm:text-[15px] lg:text-base">
             {formatPrice(price)}
           </span>
           {hasDiscount ? (
@@ -136,7 +136,7 @@ function ActionButton({ label, onClick, children }: ActionButtonProps) {
         "backdrop-blur-sm transition-all duration-200 ease-out",
         "hover:scale-105 hover:bg-white hover:text-cta-fill",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cta-fill/50",
-        "sm:h-9 sm:w-9",
+        "sm:h-9 sm:w-9 lg:h-10 lg:w-10",
       )}
     >
       {children}

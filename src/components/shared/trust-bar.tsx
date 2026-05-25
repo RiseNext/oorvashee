@@ -24,7 +24,7 @@ export function TrustBar({ items, className, tone = "light" }: TrustBarProps) {
   return (
     <ul
       className={cn(
-        "grid w-full grid-cols-3 gap-2 sm:gap-8",
+        "grid w-full grid-cols-3 gap-2 sm:gap-4 md:gap-6 lg:gap-8 xl:gap-10",
         items.length === 4 && "grid-cols-2 lg:grid-cols-4",
         className,
       )}
@@ -32,12 +32,12 @@ export function TrustBar({ items, className, tone = "light" }: TrustBarProps) {
       {items.map((item) => (
         <li
           key={item.label}
-          className="flex flex-col items-center gap-1.5 text-center sm:gap-2 sm:items-start sm:text-left"
+          className="flex flex-col items-center gap-1.5 text-center sm:gap-2 sm:items-start sm:text-left md:gap-2.5 lg:gap-3"
         >
           <span className="text-gold">{item.icon}</span>
           <span
             className={cn(
-              "text-[10px] font-medium uppercase leading-tight tracking-[0.14em] sm:text-[11px] sm:tracking-[0.18em]",
+              "text-[10px] font-medium uppercase leading-tight tracking-[0.14em] sm:text-[11px] sm:tracking-[0.18em] md:text-xs lg:text-[13px] lg:tracking-[0.2em]",
               label,
             )}
           >
@@ -45,7 +45,7 @@ export function TrustBar({ items, className, tone = "light" }: TrustBarProps) {
           </span>
           <span
             className={cn(
-              "text-[10px] font-light leading-tight sm:text-xs",
+              "text-[10px] font-light leading-tight sm:text-xs md:text-[13px] lg:text-sm",
               caption,
             )}
           >

@@ -4,6 +4,7 @@ import {
   ShopByCollection,
   SareeShowcaseSection,
   NewArrivals,
+  SareesForYou,
 } from "@/features/home";
 
 export default function HomePage() {
@@ -15,6 +16,7 @@ export default function HomePage() {
         <ShopByCollection />
         <SareeShowcaseSection />
         <NewArrivals />
+        <SareesForYou />
       </main>
     </>
   );

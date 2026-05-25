@@ -20,11 +20,11 @@ export function ShopByCollection() {
   return (
     <section
       aria-labelledby="collection-heading"
-      className="relative isolate overflow-hidden bg-bg-primary py-14 sm:py-16 md:py-20 lg:py-24"
+      className="relative isolate overflow-hidden bg-bg-primary py-14 sm:py-16 md:py-20 lg:py-24 xl:py-28 2xl:py-32"
     >
       <CollectionBackdrop />
 
-      <div className="relative z-[1] mx-auto max-w-7xl px-5 sm:px-8 md:px-10 lg:px-16">
+      <div className="relative z-[1] mx-auto max-w-7xl xl:max-w-screen-2xl px-5 sm:px-8 md:px-10 lg:px-12 xl:px-16 2xl:px-24">
         {/* Heading */}
         <motion.div
           initial="hidden"
@@ -41,20 +41,20 @@ export function ShopByCollection() {
             Collection
           </motion.h2>
 
-          <motion.div variants={fadeUp} className="mt-4 w-32 sm:w-40 lg:w-48">
+          <motion.div variants={fadeUp} className="mt-4 w-32 sm:w-40 lg:w-48 xl:w-56">
             <OrnamentalDivider align="center" />
           </motion.div>
 
           <motion.p
             variants={fadeUp}
-            className="mt-4 max-w-md font-body text-sm font-light text-text-secondary sm:text-base"
+            className="mt-4 max-w-md font-body text-sm font-light text-text-secondary sm:text-base lg:text-[17px] xl:max-w-lg xl:text-lg"
           >
             Choose a weave — every category, handpicked for you.
           </motion.p>
         </motion.div>
 
         {/* Category tabs */}
-        <div className="relative mt-8 sm:mt-10 lg:mt-12">
+        <div className="relative mt-8 sm:mt-10 lg:mt-12 xl:mt-14">
           <div
             role="tablist"
             aria-label="Saree collections"
@@ -77,8 +77,8 @@ export function ShopByCollection() {
                   id={`tab-${category.id}`}
                   onClick={() => setActiveId(category.id)}
                   className={cn(
-                    "relative shrink-0 snap-start whitespace-nowrap px-4 py-3 sm:px-5 sm:py-3.5",
-                    "font-body text-sm font-medium tracking-wide transition-colors duration-300 sm:text-[15px]",
+                    "relative shrink-0 snap-start whitespace-nowrap px-4 py-3 sm:px-5 sm:py-3.5 xl:px-6 xl:py-4",
+                    "font-body text-sm font-medium tracking-wide transition-colors duration-300 sm:text-[15px] xl:text-base",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cta-fill/40 focus-visible:rounded-sm",
                     isActive
                       ? "text-text-primary"
@@ -105,7 +105,7 @@ export function ShopByCollection() {
         </div>
 
         {/* Product showcase */}
-        <div className="mt-8 sm:mt-10 lg:mt-12">
+        <div className="mt-8 sm:mt-10 lg:mt-12 xl:mt-14">
           <AnimatePresence mode="wait">
             <motion.div
               key={active.id}
@@ -125,7 +125,7 @@ export function ShopByCollection() {
                 className={cn(
                   "scrollbar-hide flex gap-4 overflow-x-auto pb-2",
                   "snap-x snap-mandatory",
-                  "lg:grid lg:grid-cols-5 lg:gap-6 lg:overflow-visible lg:pb-0",
+                  "lg:grid lg:grid-cols-5 lg:gap-6 lg:overflow-visible lg:pb-0 2xl:gap-8",
                 )}
               >
                 {active.products.map((product) => (
@@ -146,22 +146,19 @@ export function ShopByCollection() {
         </div>
 
         {/* Shop more CTA */}
-        <div className="mt-10 flex justify-center sm:mt-12 lg:mt-14">
+        <div className="mt-10 flex justify-center sm:mt-12 lg:mt-14 xl:mt-16">
           <Link
             href={active.href}
             className={cn(
-              "group/cta inline-flex items-center gap-2 rounded-md px-7 py-3",
-              "bg-cta-fill text-white shadow-[0_8px_22px_-12px_rgba(122,75,21,0.55)]",
-              "font-body text-xs font-medium uppercase tracking-[0.22em]",
-              "transition-all duration-300 ease-out",
-              "hover:bg-cta-fill-hover hover:shadow-[0_12px_26px_-12px_rgba(122,75,21,0.65)]",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cta-fill/40",
-              "sm:gap-3 sm:px-8 sm:py-3.5 sm:text-[13px]",
+              "group inline-flex items-center gap-2 rounded-md border-[1.5px] border-cta-fill bg-bg-primary/30 px-3 py-1.5 text-[9px] font-medium uppercase tracking-[0.18em] text-cta-fill backdrop-blur-sm transition-colors duration-300",
+              "hover:bg-cta-fill hover:text-white focus-visible:bg-cta-fill focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cta-fill/30",
+              "sm:gap-3 sm:px-5 sm:py-3 sm:text-[11px] sm:tracking-[0.2em]",
+              "lg:px-7 lg:py-3.5 lg:text-[12px] lg:tracking-[0.22em]",
             )}
           >
             Shop more
             <ArrowRight
-              className="h-3.5 w-3.5 transition-transform duration-300 group-hover/cta:translate-x-1 sm:h-4 sm:w-4"
+              className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1 sm:h-3.5 sm:w-3.5"
               strokeWidth={2}
             />
           </Link>

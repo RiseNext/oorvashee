@@ -44,9 +44,9 @@ export function SareeShowcaseSection() {
   return (
     <section
       aria-labelledby="saree-showcase-heading"
-      className="relative isolate overflow-hidden bg-bg-primary py-14 sm:py-16 md:py-20 lg:py-24"
+      className="relative isolate overflow-hidden bg-bg-primary py-14 sm:py-16 md:py-20 lg:py-24 xl:py-28 2xl:py-32"
     >
-      <div className="relative z-[1] mx-auto max-w-7xl px-5 sm:px-8 md:px-10 lg:px-16">
+      <div className="relative z-[1] mx-auto max-w-7xl xl:max-w-screen-2xl px-5 sm:px-8 md:px-10 lg:px-12 xl:px-16 2xl:px-24">
         {/* External heading */}
         <motion.div
           initial="hidden"
@@ -61,16 +61,16 @@ export function SareeShowcaseSection() {
           <motion.h2
             id="saree-showcase-heading"
             variants={fadeUp}
-            className="mt-3 font-display font-normal text-text-primary leading-[1.05] text-[clamp(2rem,5vw,3.25rem)]"
+            className="mt-3 font-display font-normal text-text-primary leading-[1.05] text-[clamp(2rem,5vw,4rem)]"
           >
             A Closer Look
           </motion.h2>
-          <motion.div variants={fadeUp} className="mt-4 w-28 sm:w-32 lg:w-36">
+          <motion.div variants={fadeUp} className="mt-4 w-28 sm:w-32 lg:w-36 xl:w-44">
             <OrnamentalDivider align="center" />
           </motion.div>
           <motion.p
             variants={fadeUp}
-            className="mt-4 max-w-md font-body text-sm font-light text-text-secondary sm:text-base"
+            className="mt-4 max-w-md font-body text-sm font-light text-text-secondary sm:text-base lg:text-[17px] xl:max-w-lg xl:text-lg"
           >
             Folded, draped and laid out by hand — hover a fold to follow its
             silk down the table.
@@ -84,7 +84,7 @@ export function SareeShowcaseSection() {
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
           className={cn(
-            "relative mt-10 w-full overflow-hidden rounded-xl sm:mt-12 lg:mt-14",
+            "relative mt-10 w-full overflow-hidden rounded-xl sm:mt-12 lg:mt-14 xl:mt-16",
             "shadow-[0_30px_60px_-30px_rgba(42,19,8,0.6)] ring-1 ring-black/10",
             // portrait on mobile so text + sarees stack comfortably
             "aspect-[3/4] sm:aspect-[3/2] md:aspect-[16/10] lg:aspect-[16/9]",
@@ -95,7 +95,7 @@ export function SareeShowcaseSection() {
             src={TABLE_BG_SRC}
             alt=""
             fill
-            sizes="(min-width: 1280px) 1280px, 100vw"
+            sizes="(min-width: 1536px) 1536px, (min-width: 1280px) 1280px, 100vw"
             // portrait crop focuses on the upper-centre wood area;
             // landscape crops centre the whole table naturally
             className="object-cover object-[30%_20%] sm:object-[40%_30%] md:object-center"
@@ -133,7 +133,7 @@ export function SareeShowcaseSection() {
               <h3
                 className={cn(
                   "font-display font-normal leading-[1.05] text-text-on-dark",
-                  "text-[1.9rem] sm:text-[2rem] md:text-[2.25rem] lg:text-[2.75rem]",
+                  "text-[1.9rem] sm:text-[2rem] md:text-[2.25rem] lg:text-[2.75rem] xl:text-[3.25rem]",
                 )}
               >
                 The<br />Saree Table

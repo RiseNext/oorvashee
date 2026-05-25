@@ -24,8 +24,8 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 w-full">
-      <div className="relative px-3 pt-3 sm:px-4 sm:pt-4 md:px-6 md:pt-5 lg:px-8">
-        <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-full border border-border-default/40 bg-bg-secondary/70 px-2 py-2 shadow-[0_10px_40px_-12px_rgba(122,75,21,0.18),0_2px_6px_-2px_rgba(122,75,21,0.08)] backdrop-blur-xl backdrop-saturate-150 supports-[backdrop-filter]:bg-bg-secondary/55 md:gap-6 md:px-5 md:py-2.5 lg:px-7">
+      <div className="relative px-3 pt-3 sm:px-4 sm:pt-4 md:px-6 md:pt-5 lg:px-8 xl:px-10 2xl:px-14">
+        <div className="relative mx-auto flex max-w-7xl xl:max-w-screen-2xl items-center justify-between gap-3 rounded-full border border-border-default/40 bg-bg-secondary/70 px-2 py-2 shadow-[0_10px_40px_-12px_rgba(122,75,21,0.18),0_2px_6px_-2px_rgba(122,75,21,0.08)] backdrop-blur-xl backdrop-saturate-150 supports-[backdrop-filter]:bg-bg-secondary/55 md:gap-6 md:px-5 md:py-2.5 lg:px-7 xl:px-9 2xl:px-12">
           {/* Left: logo (always visible) */}
           <div className="flex shrink-0 items-center pl-1 md:pl-0">
             <OorvasheeLogo size={56} className="md:hidden" href="/" />

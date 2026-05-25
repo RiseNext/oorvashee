@@ -24,7 +24,7 @@ export function SectionLabel({
   return (
     <Tag
       className={cn(
-        "inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.22em]",
+        "inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.22em] lg:text-[13px] xl:text-sm",
         colorClass,
         className,
       )}

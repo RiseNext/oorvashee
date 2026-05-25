@@ -38,12 +38,12 @@ export function Hero() {
 
           {/* Text overlay — vertically centered, anchored left inside the image */}
           <div className="absolute inset-0 flex items-center">
-            <div className="mx-auto flex w-full max-w-7xl px-5 sm:px-8 md:px-10 lg:px-16">
+            <div className="mx-auto flex w-full max-w-7xl px-5 sm:px-8 md:px-10 lg:px-12 xl:max-w-screen-2xl xl:px-20 2xl:px-28">
               <motion.div
                 initial="hidden"
                 animate="visible"
                 variants={stagger(0.05, 0.12)}
-                className="flex flex-col items-start gap-3 max-w-[62%] sm:max-w-[58%] sm:gap-4 md:max-w-md md:gap-5 lg:max-w-2xl lg:gap-6"
+                className="flex flex-col items-start gap-3 max-w-[62%] sm:max-w-[58%] sm:gap-4 md:max-w-md md:gap-5 lg:max-w-2xl lg:gap-6 xl:max-w-3xl xl:gap-7"
               >
                 <motion.h1
                   variants={fadeUp}

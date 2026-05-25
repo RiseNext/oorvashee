@@ -16,11 +16,11 @@ export function NewArrivals() {
   return (
     <section
       aria-labelledby="new-arrivals-heading"
-      className="relative isolate overflow-hidden bg-bg-secondary py-14 sm:py-16 md:py-20 lg:py-24"
+      className="relative isolate overflow-hidden bg-bg-secondary py-14 sm:py-16 md:py-20 lg:py-24 xl:py-28 2xl:py-32"
     >
       <NewArrivalsBackdrop />
 
-      <div className="relative z-[1] mx-auto max-w-7xl px-5 sm:px-8 md:px-10 lg:px-16">
+      <div className="relative z-[1] mx-auto max-w-7xl xl:max-w-screen-2xl px-5 sm:px-8 md:px-10 lg:px-12 xl:px-16 2xl:px-24">
         {/* Heading */}
         <motion.div
           initial="hidden"
@@ -36,36 +36,18 @@ export function NewArrivals() {
           <motion.h2
             id="new-arrivals-heading"
             variants={fadeUp}
-            className="mt-3 font-display font-normal text-text-primary leading-[1.05] text-[clamp(2rem,5vw,3.25rem)]"
+            className="mt-3 font-display font-normal text-text-primary leading-[1.05] text-[clamp(2rem,5vw,4rem)]"
           >
             New Arrivals
           </motion.h2>
 
           <motion.div
             variants={fadeUp}
-            className="mt-4 w-28 sm:w-32 lg:w-36"
+            className="mt-4 w-28 sm:w-32 lg:w-36 xl:w-44"
           >
             <OrnamentalDivider align="center" />
           </motion.div>
 
-          <motion.div variants={fadeUp} className="mt-5">
-            <Link
-              href="/new-arrivals"
-              className={cn(
-                "group/link inline-flex items-center gap-2",
-                "font-body text-[11px] font-medium uppercase tracking-[0.22em] text-cta-fill",
-                "transition-colors duration-300 hover:text-cta-fill-hover",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cta-fill/40 focus-visible:rounded-sm",
-                "sm:text-xs",
-              )}
-            >
-              View all
-              <ArrowRight
-                className="h-3.5 w-3.5 transition-transform duration-300 group-hover/link:translate-x-1"
-                strokeWidth={2}
-              />
-            </Link>
-          </motion.div>
         </motion.div>
 
         {/* Product strip */}
@@ -78,8 +60,8 @@ export function NewArrivals() {
           className={cn(
             "scrollbar-hide mt-8 flex gap-4 overflow-x-auto pb-2",
             "snap-x snap-mandatory",
-            "sm:mt-10 lg:mt-12",
-            "lg:grid lg:grid-cols-5 lg:gap-6 lg:overflow-visible lg:pb-0",
+            "sm:mt-10 lg:mt-12 xl:mt-14",
+            "lg:grid lg:grid-cols-5 lg:gap-6 lg:overflow-visible lg:pb-0 xl:gap-7 2xl:gap-8",
           )}
         >
           {NEW_ARRIVALS.map((product) => (
@@ -95,6 +77,31 @@ export function NewArrivals() {
             </li>
           ))}
         </motion.ul>
+
+        {/* View all CTA */}
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.5 }}
+          variants={fadeUp}
+          className="mt-10 flex justify-center sm:mt-12 lg:mt-14 xl:mt-16"
+        >
+          <Link
+            href="/new-arrivals"
+            className={cn(
+              "group inline-flex items-center gap-2 rounded-md border-[1.5px] border-cta-fill bg-bg-primary/30 px-3 py-1.5 text-[9px] font-medium uppercase tracking-[0.18em] text-cta-fill backdrop-blur-sm transition-colors duration-300",
+              "hover:bg-cta-fill hover:text-white focus-visible:bg-cta-fill focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cta-fill/30",
+              "sm:gap-3 sm:px-5 sm:py-3 sm:text-[11px] sm:tracking-[0.2em]",
+              "lg:px-7 lg:py-3.5 lg:text-[12px] lg:tracking-[0.22em]",
+            )}
+          >
+            View All New Arrivals
+            <ArrowRight
+              className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1 sm:h-3.5 sm:w-3.5"
+              strokeWidth={2}
+            />
+          </Link>
+        </motion.div>
       </div>
     </section>
   );
