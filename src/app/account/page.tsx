@@ -6,10 +6,8 @@ import {
   type KeyboardEvent,
   type ClipboardEvent,
 } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { siteConfig } from "@/config/site";
+import { Navbar } from "@/features/navbar";
 
 type View = "signin" | "signup" | "verify";
 
@@ -18,42 +16,32 @@ export default function AccountPage() {
   const [email, setEmail] = useState("");
 
   return (
-    <main className="min-h-screen bg-white flex flex-col items-center px-4 pt-10 pb-20">
-      {/* Logo — centered at top, same as navbar */}
-      <Link href="/" aria-label="Back to home" className="mb-12 block">
-        <Image
-          src="/images/hero/hero-logo/oorvashee-logo3.png"
-          alt={siteConfig.fullName}
-          width={380}
-          height={80}
-          priority
-          className="h-20 w-[320px] object-fill select-none"
-        />
-      </Link>
-
-      {/* Auth card */}
-      <div className="w-full max-w-[400px]">
-        {view === "signin" && (
-          <SignInView
-            email={email}
-            setEmail={setEmail}
-            onSendCode={() => setView("verify")}
-            onGetStarted={() => setView("signup")}
-          />
-        )}
-        {view === "signup" && (
-          <SignUpView
-            email={email}
-            setEmail={setEmail}
-            onSendCode={() => setView("verify")}
-            onSignIn={() => setView("signin")}
-          />
-        )}
-        {view === "verify" && (
-          <VerifyView email={email} onBack={() => setView("signin")} />
-        )}
-      </div>
-    </main>
+    <>
+      <Navbar />
+      <main className="flex flex-1 flex-col items-center px-4 pt-12 pb-20 bg-white">
+        <div className="w-full max-w-[400px]">
+          {view === "signin" && (
+            <SignInView
+              email={email}
+              setEmail={setEmail}
+              onSendCode={() => setView("verify")}
+              onGetStarted={() => setView("signup")}
+            />
+          )}
+          {view === "signup" && (
+            <SignUpView
+              email={email}
+              setEmail={setEmail}
+              onSendCode={() => setView("verify")}
+              onSignIn={() => setView("signin")}
+            />
+          )}
+          {view === "verify" && (
+            <VerifyView email={email} onBack={() => setView("signin")} />
+          )}
+        </div>
+      </main>
+    </>
   );
 }
 

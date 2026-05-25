@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/tooltip";
 
 const desktopIconBtn =
-  "inline-flex h-11 w-11 items-center justify-center text-text-primary transition-colors duration-200 hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/30";
+  "inline-flex h-11 w-11 items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-white hover:text-black hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40";
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -61,15 +61,15 @@ export function Navbar() {
     >
       <div className="relative">
         {/* ── Desktop Layer 1: Search | Logo | Actions ── */}
-        <div className="hidden md:flex items-center border-b border-[#7a4b15]/30 px-8 lg:px-12 xl:px-16 py-3">
+        <div className="hidden md:flex items-center bg-[#54100D] px-8 lg:px-12 xl:px-16 py-3">
           {/* Left: search bar */}
           <div className="flex-1">
-            <label className="flex w-72 lg:w-96 items-center gap-3 rounded-full border-2 border-[#7a4b15]/50 bg-[#7a4b15]/5 px-5 py-2.5 cursor-text">
-              <Search className="h-[17px] w-[17px] shrink-0 text-[#7a4b15]" strokeWidth={1.8} />
+            <label className="flex w-72 lg:w-96 items-center gap-3 rounded-full border-2 border-white/70 bg-white/10 px-5 py-2.5 cursor-text">
+              <Search className="h-[17px] w-[17px] shrink-0 text-white" strokeWidth={1.8} />
               <input
                 type="search"
                 placeholder="Search sarees…"
-                className="w-full bg-transparent text-[15px] text-[#7a4b15] placeholder:text-[#7a4b15]/60 outline-none font-display italic"
+                className="w-full bg-transparent text-[15px] text-white placeholder:text-white/60 outline-none font-display italic"
               />
             </label>
           </div>
@@ -78,7 +78,7 @@ export function Navbar() {
           <div className="flex-1 flex justify-center">
             <Link href="/" aria-label={siteConfig.fullName} className="inline-block">
               <Image
-                src="/images/hero/hero-logo/oorvashee-logo3.png"
+                src="/images/hero/hero-logo/oorvashee-logo2.jpg"
                 alt={siteConfig.fullName}
                 width={480}
                 height={80}
@@ -107,7 +107,7 @@ export function Navbar() {
 
               <Tooltip>
                 <TooltipTrigger render={<div className="inline-flex" />}>
-                  <CartButton className="h-11 w-11" />
+                  <CartButton variant="light" />
                 </TooltipTrigger>
                 <TooltipContent side="bottom" sideOffset={8}>Cart</TooltipContent>
               </Tooltip>
@@ -140,26 +140,26 @@ export function Navbar() {
         </nav>
 
         {/* ── Mobile header ── */}
-        <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-gray-100">
+        <div className="md:hidden flex items-center justify-between bg-[#54100D] px-4 py-2">
           <Link href="/" aria-label={siteConfig.fullName} className="inline-block">
             <Image
-              src="/images/hero/hero-logo/oorvashee-logo3.png"
+              src="/images/hero/hero-logo/oorvashee-logo2.jpg"
               alt={siteConfig.fullName}
-              width={100}
-              height={40}
+              width={160}
+              height={44}
               priority
-              className="h-10 w-auto object-contain select-none"
+              className="h-11 w-auto object-contain select-none"
             />
           </Link>
           <div className="flex items-center gap-0.5">
             <button
               type="button"
               aria-label="Search"
-              className="inline-flex h-10 w-10 items-center justify-center text-text-primary transition-colors duration-200 hover:text-gold"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-white hover:text-black hover:scale-110 focus-visible:outline-none"
             >
               <Search className="h-[18px] w-[18px]" strokeWidth={1.6} />
             </button>
-            <CartButton />
+            <CartButton variant="light" />
             <button
               type="button"
               aria-controls="mobile-menu-panel"
@@ -167,8 +167,8 @@ export function Navbar() {
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               onClick={() => setMobileOpen((v) => !v)}
               className={cn(
-                "inline-flex h-10 w-10 items-center justify-center text-text-primary transition-colors duration-200 hover:text-gold focus-visible:outline-none",
-                mobileOpen && "text-gold",
+                "inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-white hover:text-black hover:scale-110 focus-visible:outline-none",
+                mobileOpen && "bg-white text-black",
               )}
             >
               {mobileOpen ? (
