@@ -1,18 +1,8 @@
-import { Navbar } from "@/features/navbar";
-import { ComingSoon } from "@/components/shared/coming-soon";
+import { NewArrivalsListingPage } from "@/features/new-arrivals-page/new-arrivals-listing-page";
+import { NEW_ARRIVALS_PAGE_PRODUCTS } from "@/features/new-arrivals-page/data";
 
 export const metadata = { title: "New Arrivals" };
 
 export default function NewArrivalsPage() {
-  return (
-    <>
-      <Navbar />
-      <main className="flex-1">
-        <ComingSoon
-          title="New Arrivals"
-          blurb="Fresh weaves landing soon. This grid will list the latest pieces as they arrive from the looms."
-        />
-      </main>
-    </>
-  );
+  return <NewArrivalsListingPage products={NEW_ARRIVALS_PAGE_PRODUCTS} />;
 }

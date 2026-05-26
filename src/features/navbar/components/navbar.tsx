@@ -80,10 +80,10 @@ export function Navbar() {
               <Image
                 src="/images/hero/hero-logo/oorvashee-logo2.jpg"
                 alt={siteConfig.fullName}
-                width={480}
+                width={240}
                 height={80}
                 priority
-                className="h-20 w-[240px] xl:w-[280px] object-fill select-none"
+                className="h-20 w-auto object-contain select-none"
               />
             </Link>
           </div>

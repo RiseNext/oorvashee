@@ -1,18 +1,14 @@
-import { Navbar } from "@/features/navbar";
-import { ComingSoon } from "@/components/shared/coming-soon";
+import { SareeListingPage } from "@/features/saree-listing/saree-listing-page";
+import { SAREE_LISTING_PRODUCTS } from "@/features/saree-listing/data";
 
-export const metadata = { title: "Saris" };
+export const metadata = { title: "All Sarees" };
 
 export default function SarisPage() {
   return (
-    <>
-      <Navbar />
-      <main className="flex-1">
-        <ComingSoon
-          title="Saris"
-          blurb="The full saris catalogue lands when we build the products page."
-        />
-      </main>
-    </>
+    <SareeListingPage
+      title="All Sarees"
+      subtitle="Handcrafted heritage — from loom to drape"
+      products={SAREE_LISTING_PRODUCTS.all}
+    />
   );
 }

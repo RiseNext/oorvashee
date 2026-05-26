@@ -2,7 +2,6 @@ import { Navbar } from "@/features/navbar";
 import {
   Hero,
   ShopByCollection,
-  SareeShowcaseSection,
   NewArrivals,
   SareesForYou,
 } from "@/features/home";
@@ -14,7 +13,6 @@ export default function HomePage() {
       <main className="flex-1">
         <Hero />
         <ShopByCollection />
-        <SareeShowcaseSection />
         <NewArrivals />
         <SareesForYou />
       </main>
