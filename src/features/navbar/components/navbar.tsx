@@ -10,6 +10,7 @@ import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { CartButton } from "./cart-button";
 import { MobileMenuPanel } from "./mobile-menu-panel";
+import { MobileSearchPanel } from "./mobile-search-panel";
 import { NavDropdown } from "./nav-dropdown";
 import { NavLink } from "./nav-link";
 import {
@@ -24,12 +25,14 @@ const desktopIconBtn =
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [visible, setVisible] = useState(true);
   const lastScrollY = useRef(0);
   const pathname = usePathname();
 
   useEffect(() => {
     setMobileOpen(false);
+    setSearchOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -141,31 +144,17 @@ export function Navbar() {
 
         {/* ── Mobile header ── */}
         <div className="md:hidden flex items-center justify-between bg-[#54100D] px-4 py-2">
-          <Link href="/" aria-label={siteConfig.fullName} className="inline-block">
-            <Image
-              src="/images/hero/hero-logo/oorvashee-logo2.jpg"
-              alt={siteConfig.fullName}
-              width={160}
-              height={44}
-              priority
-              className="h-11 w-auto object-contain select-none"
-            />
-          </Link>
+          {/* LEFT: Menu + Search + Cart */}
           <div className="flex items-center gap-0.5">
-            <button
-              type="button"
-              aria-label="Search"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-white hover:text-black hover:scale-110 focus-visible:outline-none"
-            >
-              <Search className="h-[18px] w-[18px]" strokeWidth={1.6} />
-            </button>
-            <CartButton variant="light" />
             <button
               type="button"
               aria-controls="mobile-menu-panel"
               aria-expanded={mobileOpen}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
-              onClick={() => setMobileOpen((v) => !v)}
+              onClick={() => {
+                setMobileOpen((v) => !v);
+                setSearchOpen(false);
+              }}
               className={cn(
                 "inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-white hover:text-black hover:scale-110 focus-visible:outline-none",
                 mobileOpen && "bg-white text-black",
@@ -177,13 +166,47 @@ export function Navbar() {
                 <Menu className="h-5 w-5" strokeWidth={1.7} />
               )}
             </button>
+            <button
+              type="button"
+              aria-label="Search"
+              aria-expanded={searchOpen}
+              aria-controls="mobile-search-panel"
+              onClick={() => {
+                setSearchOpen((v) => !v);
+                setMobileOpen(false);
+              }}
+              className={cn(
+                "inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-white hover:text-black hover:scale-110 focus-visible:outline-none",
+                searchOpen && "bg-white text-black",
+              )}
+            >
+              <Search className="h-[18px] w-[18px]" strokeWidth={1.6} />
+            </button>
+            <CartButton variant="light" />
           </div>
+
+          {/* RIGHT: Logo */}
+          <Link href="/" aria-label={siteConfig.fullName} className="inline-block">
+            <Image
+              src="/images/hero/hero-logo/oorvashee-logo2.jpg"
+              alt={siteConfig.fullName}
+              width={160}
+              height={44}
+              priority
+              className="h-11 w-auto object-contain select-none"
+            />
+          </Link>
         </div>
 
-        {/* Mobile dropdown panel */}
+        {/* Mobile dropdown panels */}
         <AnimatePresence initial={false}>
           {mobileOpen ? (
             <MobileMenuPanel onClose={() => setMobileOpen(false)} />
+          ) : null}
+        </AnimatePresence>
+        <AnimatePresence initial={false}>
+          {searchOpen ? (
+            <MobileSearchPanel onClose={() => setSearchOpen(false)} />
           ) : null}
         </AnimatePresence>
       </div>
