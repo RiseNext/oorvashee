@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { MessageCircle, Mail, Phone, MapPin } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
@@ -82,7 +83,20 @@ const headingClass = "mb-4 font-body text-[11px] font-semibold uppercase trackin
 
 export function Footer() {
   return (
-    <footer className="relative bg-[#54100D] text-white">
+    <footer className="relative isolate overflow-hidden bg-[#54100D] text-white">
+      {/* Textured brand backdrop (embossed crest). `bg-[#54100D]` above is the
+          graceful fallback if the asset is missing or still loading. */}
+      <Image
+        src="/images/footer/footer-bg.png"
+        alt=""
+        aria-hidden
+        fill
+        sizes="100vw"
+        className="-z-10 object-cover object-left"
+      />
+      {/* Subtle scrim — keeps text/link contrast over the texture without
+          washing out the artwork (same hue, low opacity). */}
+      <div aria-hidden className="absolute inset-0 -z-10 bg-[#54100D]/25" />
       {/* Gold hairline accent */}
       <div className="h-px w-full bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
 
