@@ -300,8 +300,22 @@ export async function uploadToCloudinary(sig: UploadSignature, file: File): Prom
     .join("|");
   if (context) fd.append("context", context);
   if (sig.publicId) fd.append("public_id", sig.publicId);
+
+  // TEMPORARY forensic debug — REMOVE after diagnosing Cloudinary 401.
+  // Logs every transmitted FormData field/value (file shown as a summary).
+  const debugFields: Record<string, string> = {};
+  for (const [k, v] of fd.entries()) {
+    debugFields[k] = v instanceof File ? `File(${v.name}, ${v.size}B, ${v.type})` : String(v);
+  }
+  console.warn("[DEBUG cloudinary upload] url:", sig.uploadUrl, "fields:", debugFields);
+
   const res = await fetch(sig.uploadUrl, { method: "POST", body: fd });
-  if (!res.ok) throw new Error("Cloudinary upload failed");
+  if (!res.ok) {
+    // TEMPORARY forensic debug — surface the real Cloudinary error body.
+    const body = await res.text().catch(() => "<unreadable>");
+    console.error("[DEBUG cloudinary upload] FAILED", res.status, res.statusText, body);
+    throw new Error(`Cloudinary upload failed: ${res.status} ${body}`);
+  }
   return (await res.json()) as Dict;
 }
 
