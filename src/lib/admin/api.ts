@@ -231,6 +231,76 @@ export function transitionProduct(af: AuthedFetch, id: string, t: ProductTransit
   return af<Dict>(`/admin/products/${id}/${t}`, { method: "POST" }).then(mapProduct);
 }
 
+// ---------- Variants ----------
+export interface VariantCreateInput {
+  sku: string;
+  color?: string | null;
+  fabric?: string | null;
+  size?: string | null;
+  /** Per-variant price; falls back to product.basePrice when null. */
+  priceOverride?: number | null;
+  isActive?: boolean;
+  isDefault?: boolean;
+  /** Seeds the variant's inventory row in the same transaction. */
+  initialStock?: number;
+  lowStockThreshold?: number;
+}
+
+/** Create a variant (+ its inventory row). Backend keys it by product id. */
+export function createVariant(
+  af: AuthedFetch,
+  productId: string,
+  input: VariantCreateInput,
+): Promise<AdminVariant> {
+  return af<Dict>(`/admin/products/${productId}/variants`, {
+    method: "POST",
+    body: {
+      sku: input.sku,
+      color: input.color ?? null,
+      fabric: input.fabric ?? null,
+      size: input.size ?? null,
+      price_override: input.priceOverride ?? null,
+      is_active: input.isActive ?? true,
+      is_default: input.isDefault ?? false,
+      initial_stock: input.initialStock ?? 0,
+      low_stock_threshold: input.lowStockThreshold ?? 2,
+    },
+  }).then(mapVariant);
+}
+
+export interface VariantUpdateInput {
+  color?: string | null;
+  fabric?: string | null;
+  size?: string | null;
+  priceOverride?: number | null;
+  isActive?: boolean;
+  isDefault?: boolean;
+}
+
+/**
+ * Partial variant update. Only the provided fields are sent. Stock is NOT
+ * updatable here — it flows through the inventory adjust endpoint. Setting
+ * `isActive: false` is the soft-deactivate path (reversible).
+ */
+export function updateVariant(
+  af: AuthedFetch,
+  productId: string,
+  variantId: string,
+  patch: VariantUpdateInput,
+): Promise<AdminVariant> {
+  const body: Record<string, unknown> = {};
+  if (patch.color !== undefined) body.color = patch.color;
+  if (patch.fabric !== undefined) body.fabric = patch.fabric;
+  if (patch.size !== undefined) body.size = patch.size;
+  if (patch.priceOverride !== undefined) body.price_override = patch.priceOverride;
+  if (patch.isActive !== undefined) body.is_active = patch.isActive;
+  if (patch.isDefault !== undefined) body.is_default = patch.isDefault;
+  return af<Dict>(`/admin/products/${productId}/variants/${variantId}`, {
+    method: "PATCH",
+    body,
+  }).then(mapVariant);
+}
+
 // ---------- Media (Cloudinary signed upload) ----------
 export interface UploadSignature {
   cloudName: string;

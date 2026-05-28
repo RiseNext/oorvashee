@@ -9,8 +9,9 @@ import { toast } from "sonner";
 import { useApiClient } from "@/hooks/use-api-client";
 import * as admin from "@/lib/admin/api";
 import { toastApiError } from "@/lib/api/toast";
-import { AdminCard, StatusBadge, fmtINR, statusTone } from "@/features/admin/ui";
+import { AdminCard, StatusBadge, statusTone } from "@/features/admin/ui";
 import { ProductMedia } from "@/features/admin/product-media";
+import { ProductVariants } from "@/features/admin/product-variants";
 import { cn } from "@/lib/utils";
 import type { ProductTransition } from "@/lib/admin/api";
 import type { AdminProduct, ProductStatus } from "@/types/admin";
@@ -129,32 +130,12 @@ function EditForm({ product, refetch }: { product: AdminProduct; refetch: () => 
 
           <AdminCard>
             <h2 className="mb-4 font-body text-sm font-bold uppercase tracking-[0.14em] text-text-primary">Variants</h2>
-            {product.variants.length === 0 ? (
-              <p className="font-body text-sm text-text-muted">No variants.</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left font-body text-sm">
-                  <thead className="text-text-muted">
-                    <tr className="border-b border-border-light">
-                      <th className="py-2 pr-3 font-medium">SKU</th>
-                      <th className="py-2 pr-3 font-medium">Variant</th>
-                      <th className="py-2 pr-3 font-medium">Stock</th>
-                      <th className="py-2 font-medium">Price</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {product.variants.map((v) => (
-                      <tr key={v.id} className="border-b border-border-light last:border-0">
-                        <td className="py-2 pr-3 text-text-primary">{v.sku}</td>
-                        <td className="py-2 pr-3 text-text-secondary">{[v.color, v.fabric, v.size].filter(Boolean).join(" · ") || "—"}</td>
-                        <td className="py-2 pr-3 text-text-secondary">{v.stock}{v.reserved > 0 ? ` (${v.reserved} reserved)` : ""}</td>
-                        <td className="py-2 text-text-primary">{fmtINR(v.priceOverride ?? product.basePrice)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            <ProductVariants
+              productId={product.id}
+              variants={product.variants}
+              basePrice={product.basePrice}
+              onChanged={refetch}
+            />
           </AdminCard>
         </div>
 
