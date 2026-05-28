@@ -242,10 +242,6 @@ export interface UploadSignature {
   eager: string[];
   publicId: string | null;
   resourceType: string;
-  allowedFormats: string[];
-  maxFileSize: number;
-  tags: string[];
-  context: string;
 }
 
 export function signUpload(af: AuthedFetch, entityId: string): Promise<UploadSignature> {
@@ -262,10 +258,6 @@ export function signUpload(af: AuthedFetch, entityId: string): Promise<UploadSig
     eager: (d.eager as string[]) ?? [],
     publicId: sn(d.public_id),
     resourceType: s(d.resource_type) || "image",
-    allowedFormats: (d.allowed_formats as string[]) ?? [],
-    maxFileSize: Number(d.max_file_size ?? 0),
-    tags: (d.tags as string[]) ?? [],
-    context: s(d.context),
   }));
 }
 
@@ -273,16 +265,11 @@ export function signUpload(af: AuthedFetch, entityId: string): Promise<UploadSig
  * Upload a file to Cloudinary with the signed envelope, returning the raw
  * Cloudinary result (the backend re-verifies its signature on attach).
  *
- * Every non-`file`/`api_key`/`signature` field below is part of the backend
- * signature, so each value MUST be stringified exactly as the backend did when
- * signing (see app/integrations/cloudinary_client.py `_stringify`):
- *   - lists (`eager`, `allowed_formats`, `tags`) → pipe-joined
- *   - `max_file_size` → the integer as a string
- *   - `context` → a pre-formed `key=value|key=value` string, sent verbatim
- *     (e.g. `product|entity_id=<uuid>`); the backend signs this exact value
- * Cloudinary sorts the received params itself before verifying, so the append
- * order here is irrelevant — only the values must match. Empty params are
- * omitted to mirror the backend's canonicalisation (which drops empty values).
+ * Only the stable, deterministic fields the backend signs are transmitted:
+ * `timestamp`, `folder`, and (when present) `eager` / `public_id`. `eager` is
+ * pipe-joined to match the backend's canonicalisation exactly. Cloudinary sorts
+ * the received params itself before verifying, so append order is irrelevant —
+ * only the values (and the set) must match what was signed.
  */
 export async function uploadToCloudinary(sig: UploadSignature, file: File): Promise<Dict> {
   const fd = new FormData();
@@ -291,11 +278,7 @@ export async function uploadToCloudinary(sig: UploadSignature, file: File): Prom
   fd.append("timestamp", String(sig.timestamp));
   fd.append("signature", sig.signature);
   fd.append("folder", sig.folder);
-  fd.append("max_file_size", String(sig.maxFileSize));
   if (sig.eager.length > 0) fd.append("eager", sig.eager.join("|"));
-  if (sig.allowedFormats.length > 0) fd.append("allowed_formats", sig.allowedFormats.join("|"));
-  if (sig.tags.length > 0) fd.append("tags", sig.tags.join("|"));
-  if (sig.context) fd.append("context", sig.context);
   if (sig.publicId) fd.append("public_id", sig.publicId);
 
   // TEMPORARY forensic debug — REMOVE after diagnosing Cloudinary 401.
