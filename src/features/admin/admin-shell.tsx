@@ -74,15 +74,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary">
+    <div className="min-h-screen bg-gradient-to-b from-bg-primary to-bg-secondary/20">
       {/* Top bar */}
       <header className="sticky top-0 z-40 border-b border-border-light bg-white/90 backdrop-blur">
+        {/* Gold hairline — luxury frame */}
+        <span aria-hidden className="block h-[2px] w-full bg-gradient-to-r from-gold/30 via-gold to-gold/30" />
         <div className="flex h-14 items-center justify-between px-4 sm:px-6">
-          <Link href="/admin" className="flex items-baseline gap-2">
-            <span className="font-display text-lg font-semibold tracking-wide" style={{ color: "var(--gold)" }}>
+          <Link href="/admin" className="flex items-baseline gap-2.5">
+            <span className="font-display text-xl font-semibold tracking-wide" style={{ color: "var(--gold)" }}>
               Oorvashee
             </span>
-            <span className="font-body text-[10px] font-medium uppercase tracking-[0.25em] text-text-muted">
+            <span aria-hidden className="h-3.5 w-px bg-border-default" />
+            <span className="font-body text-[10px] font-medium uppercase tracking-[0.28em] text-text-muted">
               Admin
             </span>
           </Link>
@@ -112,9 +115,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
               key={item.href}
               href={item.href}
               className={cn(
-                "shrink-0 rounded-full px-3.5 py-1.5 font-body text-xs font-medium transition-colors",
+                "shrink-0 rounded-full px-3.5 py-1.5 font-body text-xs font-medium transition-colors duration-200",
                 active(pathname, item.href, item.exact)
-                  ? "bg-cta-fill text-white"
+                  ? "bg-[#54100D] text-white shadow-sm"
                   : "text-text-secondary hover:bg-bg-secondary",
               )}
             >
@@ -126,8 +129,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
       <div className="mx-auto flex max-w-screen-2xl">
         {/* Desktop sidebar */}
-        <aside className="hidden w-60 shrink-0 border-r border-border-light bg-white lg:block">
-          <nav className="sticky top-14 space-y-1 p-4">
+        <aside className="hidden w-60 shrink-0 border-r border-border-light bg-white/70 lg:block">
+          <nav className="sticky top-16 space-y-1.5 p-4">
+            <p className="px-3 pb-2 font-body text-[10px] font-semibold uppercase tracking-[0.2em] text-text-muted">
+              Manage
+            </p>
             {NAV.map((item) => {
               const Icon = item.icon;
               const isActive = active(pathname, item.href, item.exact);
@@ -135,14 +141,24 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 font-body text-sm transition-colors",
+                    "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 font-body text-sm transition-all duration-200",
                     isActive
-                      ? "bg-bg-secondary font-semibold text-text-primary"
+                      ? "bg-[#54100D]/[0.06] font-semibold text-[#54100D] ring-1 ring-inset ring-[#54100D]/10"
                       : "text-text-secondary hover:bg-bg-secondary/60 hover:text-text-primary",
                   )}
                 >
-                  <Icon className="h-4 w-4" strokeWidth={1.75} />
+                  {isActive && (
+                    <span aria-hidden className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-gold" />
+                  )}
+                  <Icon
+                    className={cn(
+                      "h-[18px] w-[18px] transition-colors",
+                      isActive ? "text-[#54100D]" : "text-text-muted group-hover:text-text-primary",
+                    )}
+                    strokeWidth={1.75}
+                  />
                   {item.label}
                 </Link>
               );
@@ -159,8 +175,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
 /** Page heading used across admin screens. */
 export function AdminHeading({ title, action }: { title: string; action?: ReactNode }) {
   return (
-    <div className="mb-6 flex items-center justify-between gap-4">
-      <h1 className="font-display text-2xl font-semibold text-text-primary sm:text-3xl">{title}</h1>
+    <div className="mb-7 flex items-center justify-between gap-4">
+      <div className="flex items-center gap-3">
+        <span aria-hidden className="h-7 w-[3px] shrink-0 rounded-full bg-gradient-to-b from-gold to-cta-fill" />
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-text-primary sm:text-3xl">{title}</h1>
+      </div>
       {action}
     </div>
   );
