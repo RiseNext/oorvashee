@@ -20,10 +20,12 @@ const clientSchema = z.object({
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().optional(),
   NEXT_PUBLIC_CLERK_SIGN_IN_URL: z.string().default("/sign-in"),
   NEXT_PUBLIC_CLERK_SIGN_UP_URL: z.string().default("/sign-up"),
-  // Optional named Clerk JWT template for getToken(). Leave unset to use the
-  // default session token (which must be customised in the Clerk dashboard to
-  // include `email` + `role` claims — the backend reads both). See AUTH docs.
-  NEXT_PUBLIC_CLERK_JWT_TEMPLATE: z.string().optional(),
+  // Named Clerk JWT template for getToken(). Defaults to "backend" — the
+  // template that mints `aud: "oorvashee-api"` (plus the `email`/`role` claims),
+  // which the FastAPI backend now REQUIRES. The default session token lacks the
+  // audience and is rejected, so this is mandatory; override only if the Clerk
+  // template is renamed.
+  NEXT_PUBLIC_CLERK_JWT_TEMPLATE: z.string().default("backend"),
   // Dev-only escape hatch. Defaults to "false" (live backend) so production is
   // safe even if the env var is omitted; set "true" locally to render the UI
   // on mock data without a backend.

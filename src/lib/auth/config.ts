@@ -23,9 +23,10 @@ export const SIGN_IN_URL = clientEnv.NEXT_PUBLIC_CLERK_SIGN_IN_URL;
 export const SIGN_UP_URL = clientEnv.NEXT_PUBLIC_CLERK_SIGN_UP_URL;
 
 /**
- * Optional named Clerk JWT template for `getToken()`. When unset, the default
- * session token is used — which must be customised in the Clerk dashboard to
- * include `email` + `role` claims (the backend reads both; see AUTH docs).
+ * Named Clerk JWT template for `getToken()`. Always set (defaults to "backend",
+ * see env.ts) — it mints the `aud: "oorvashee-api"` audience plus the
+ * `email`/`role` claims the FastAPI backend verifies. Every authenticated call
+ * goes through this template; there is no default-session-token fallback.
  */
 export const CLERK_JWT_TEMPLATE = clientEnv.NEXT_PUBLIC_CLERK_JWT_TEMPLATE;
 

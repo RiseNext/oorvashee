@@ -12,18 +12,19 @@ import { CLERK_ENABLED, CLERK_JWT_TEMPLATE } from "@/lib/auth/config";
  * injected into backend requests. Components/hooks call `authedFetch` (never
  * the bare `apiFetch`) for `/account/*`, `/cart/*`, and authenticated checkout.
  *
- * Token lifecycle: `getToken()` returns a cached valid JWT or transparently
- * refreshes it (Clerk handles refresh). On a backend 401 (token rotated/just
- * expired) we force a fresh token once and retry — a seamless recovery with no
- * visible re-auth. Persistent 401/403 surface as `ApiError` for `toastApiError`.
+ * Token lifecycle: `getToken({ template })` mints/returns a cached JWT for the
+ * `CLERK_JWT_TEMPLATE` (defaults to "backend"), which carries the
+ * `aud: "oorvashee-api"` audience the backend requires — there is no
+ * default-session-token fallback. On a backend 401 (token rotated/just expired)
+ * we force a fresh token once and retry — a seamless recovery with no visible
+ * re-auth. Persistent 401/403 surface as `ApiError` for `toastApiError`.
  */
 
-type TokenOpts = { template?: string; skipCache?: boolean };
+type TokenOpts = { template: string; skipCache?: boolean };
 
-function tokenOptions(skipCache = false): TokenOpts | undefined {
-  if (!CLERK_JWT_TEMPLATE && !skipCache) return undefined;
+function tokenOptions(skipCache = false): TokenOpts {
   return {
-    ...(CLERK_JWT_TEMPLATE ? { template: CLERK_JWT_TEMPLATE } : {}),
+    template: CLERK_JWT_TEMPLATE,
     ...(skipCache ? { skipCache: true } : {}),
   };
 }
