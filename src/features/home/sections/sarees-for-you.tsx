@@ -11,22 +11,22 @@ import { fadeUp, stagger } from "@/animations/fade";
 const priceRanges = [
   {
     label: "Under ₹1,000",
-    href: "/shop?price=under-1000",
+    href: "/collections/under-1000",
     image: "/images/prize/under-1000/Untitled - May 25, 2026 at 13.07.12.png",
   },
   {
     label: "Under ₹2,000",
-    href: "/shop?price=under-2000",
+    href: "/collections/under-2000",
     image: "/images/prize/under-2000/Untitled - May 25, 2026 at 13.08.43.png",
   },
   {
     label: "Under ₹5,000",
-    href: "/shop?price=under-5000",
+    href: "/collections/under-5000",
     image: "/images/prize/under-5000/Untitled - May 25, 2026 at 13.10.44.png",
   },
   {
     label: "Under ₹10,000",
-    href: "/shop?price=under-10000",
+    href: "/collections/under-10000",
     image: "/images/prize/under-10,000/Untitled - May 25, 2026 at 13.11.45.png",
   },
 ];

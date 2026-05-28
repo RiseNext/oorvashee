@@ -8,6 +8,7 @@ import {
 } from "@/features/home";
 import { getCollectionBySlug, listProducts } from "@/lib/api/products";
 import { toCardProducts } from "@/lib/catalog/presenters";
+import { Footer } from "@/components/shared/footer";
 
 // Landing page reads live catalog. Render per request and degrade gracefully:
 // each fetch is independently caught so a backend hiccup never blanks the page
@@ -61,6 +62,7 @@ export default async function HomePage() {
         <NewArrivals products={newArrivals} />
         <SareesForYou />
       </main>
+      <Footer />
     </>
   );
 }
