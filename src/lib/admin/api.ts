@@ -100,6 +100,7 @@ function mapProductListItem(d: Dict): AdminProductListItem {
     primaryImageUrl: sn(d.primary_image_url),
     totalStock: Number(d.total_stock ?? 0),
     variantCount: Number(d.variant_count ?? 0),
+    categories: (d.categories as string[]) ?? [],
     updatedAt: s(d.updated_at),
   };
 }
@@ -299,6 +300,24 @@ export function updateVariant(
     method: "PATCH",
     body,
   }).then(mapVariant);
+}
+
+// ---------- Categories (product assignment) ----------
+
+/**
+ * Replace a product's category set (PUT = replace-semantics, idempotent under
+ * retry). Backend validates every id is an existing, active category and
+ * returns the full updated product.
+ */
+export function setProductCategories(
+  af: AuthedFetch,
+  productId: string,
+  categoryIds: string[],
+): Promise<AdminProduct> {
+  return af<Dict>(`/admin/products/${productId}/categories`, {
+    method: "PUT",
+    body: { category_ids: categoryIds },
+  }).then(mapProduct);
 }
 
 // ---------- Media (Cloudinary signed upload) ----------

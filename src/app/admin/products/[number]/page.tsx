@@ -12,6 +12,7 @@ import { toastApiError } from "@/lib/api/toast";
 import { AdminCard, StatusBadge, statusTone } from "@/features/admin/ui";
 import { ProductMedia } from "@/features/admin/product-media";
 import { ProductVariants } from "@/features/admin/product-variants";
+import { ProductCategories } from "@/features/admin/product-categories";
 import { cn } from "@/lib/utils";
 import type { ProductTransition } from "@/lib/admin/api";
 import type { AdminProduct, ProductStatus } from "@/types/admin";
@@ -126,6 +127,15 @@ function EditForm({ product, refetch }: { product: AdminProduct; refetch: () => 
           <AdminCard>
             <h2 className="mb-4 font-body text-sm font-bold uppercase tracking-[0.14em] text-text-primary">Media</h2>
             <ProductMedia productId={product.id} images={product.images} onChanged={refetch} />
+          </AdminCard>
+
+          <AdminCard>
+            <h2 className="mb-4 font-body text-sm font-bold uppercase tracking-[0.14em] text-text-primary">Categories</h2>
+            <ProductCategories
+              productId={product.id}
+              categoryIds={product.categoryIds}
+              onChanged={refetch}
+            />
           </AdminCard>
 
           <AdminCard>

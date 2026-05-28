@@ -21,6 +21,7 @@ export interface AdminProductListItem {
   primaryImageUrl: string | null;
   totalStock: number;
   variantCount: number;
+  categories: string[];
   updatedAt: string;
 }
 

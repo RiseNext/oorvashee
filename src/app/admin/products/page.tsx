@@ -108,6 +108,18 @@ export default function AdminProductsPage() {
                     <p className="font-body text-xs text-text-muted">
                       {fmtINR(p.basePrice)} · {p.totalStock} in stock · {p.variantCount} variants
                     </p>
+                    {p.categories.length > 0 && (
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {p.categories.slice(0, 3).map((c) => (
+                          <span key={c} className="rounded-full bg-bg-secondary px-2 py-0.5 font-body text-[10px] text-text-secondary">
+                            {c}
+                          </span>
+                        ))}
+                        {p.categories.length > 3 && (
+                          <span className="font-body text-[10px] text-text-muted">+{p.categories.length - 3}</span>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <StatusBadge label={p.status} tone={statusTone(p.status)} />
                 </Link>
