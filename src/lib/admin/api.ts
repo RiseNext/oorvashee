@@ -245,7 +245,7 @@ export interface UploadSignature {
   allowedFormats: string[];
   maxFileSize: number;
   tags: string[];
-  context: Record<string, string>;
+  context: string;
 }
 
 export function signUpload(af: AuthedFetch, entityId: string): Promise<UploadSignature> {
@@ -265,7 +265,7 @@ export function signUpload(af: AuthedFetch, entityId: string): Promise<UploadSig
     allowedFormats: (d.allowed_formats as string[]) ?? [],
     maxFileSize: Number(d.max_file_size ?? 0),
     tags: (d.tags as string[]) ?? [],
-    context: (d.context as Record<string, string>) ?? {},
+    context: s(d.context),
   }));
 }
 
@@ -278,8 +278,8 @@ export function signUpload(af: AuthedFetch, entityId: string): Promise<UploadSig
  * signing (see app/integrations/cloudinary_client.py `_stringify`):
  *   - lists (`eager`, `allowed_formats`, `tags`) → pipe-joined
  *   - `max_file_size` → the integer as a string
- *   - `context` dict → `key=value` pairs joined by `|`, in insertion order
- *     (e.g. `context=product|entity_id=<uuid>`)
+ *   - `context` → a pre-formed `key=value|key=value` string, sent verbatim
+ *     (e.g. `product|entity_id=<uuid>`); the backend signs this exact value
  * Cloudinary sorts the received params itself before verifying, so the append
  * order here is irrelevant — only the values must match. Empty params are
  * omitted to mirror the backend's canonicalisation (which drops empty values).
@@ -295,10 +295,7 @@ export async function uploadToCloudinary(sig: UploadSignature, file: File): Prom
   if (sig.eager.length > 0) fd.append("eager", sig.eager.join("|"));
   if (sig.allowedFormats.length > 0) fd.append("allowed_formats", sig.allowedFormats.join("|"));
   if (sig.tags.length > 0) fd.append("tags", sig.tags.join("|"));
-  const context = Object.entries(sig.context)
-    .map(([k, v]) => `${k}=${v}`)
-    .join("|");
-  if (context) fd.append("context", context);
+  if (sig.context) fd.append("context", sig.context);
   if (sig.publicId) fd.append("public_id", sig.publicId);
 
   // TEMPORARY forensic debug — REMOVE after diagnosing Cloudinary 401.
