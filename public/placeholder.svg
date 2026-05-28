@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000" role="img" aria-label="Image coming soon">
+  <rect width="800" height="1000" fill="#F0E6D3"/>
+  <rect x="0.5" y="0.5" width="799" height="999" fill="none" stroke="#E5D5BC"/>
+  <g fill="none" stroke="#C9A84C" stroke-width="2" opacity="0.5">
+    <circle cx="400" cy="470" r="70"/>
+    <path d="M360 470 h80 M400 430 v80"/>
+  </g>
+  <text x="400" y="600" text-anchor="middle" font-family="Georgia, serif" font-size="28" fill="#9A7055">Oorvashee</text>
+  <text x="400" y="635" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" letter-spacing="2" fill="#9A7055">IMAGE COMING SOON</text>
+</svg>

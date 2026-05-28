@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Navbar } from "@/features/navbar";
 import { ProductCard, type Product } from "@/components/shared/product-card";
@@ -27,9 +28,18 @@ export interface SareeListingPageProps {
   title: string;
   subtitle?: string;
   products: Product[];
+  /** Empty-state copy override (e.g. for search "no results"). */
+  emptyTitle?: string;
+  emptyBody?: string;
 }
 
-export function SareeListingPage({ title, subtitle, products }: SareeListingPageProps) {
+export function SareeListingPage({
+  title,
+  subtitle,
+  products,
+  emptyTitle = "This collection is being curated.",
+  emptyBody = "New handwoven pieces are arriving soon. Explore the rest of our sarees in the meantime.",
+}: SareeListingPageProps) {
   const [sort, setSort] = useState<SortValue>("featured");
   const [sortOpen, setSortOpen] = useState(false);
   const [page, setPage] = useState(1);
@@ -74,7 +84,6 @@ export function SareeListingPage({ title, subtitle, products }: SareeListingPage
     [],
   );
 
-  const selectedLabel = SORT_OPTIONS.find((o) => o.value === sort)?.label ?? "Featured";
 
   const pageNumbers = useMemo((): (number | "…")[] => {
     if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -119,6 +128,27 @@ export function SareeListingPage({ title, subtitle, products }: SareeListingPage
           ref={gridRef}
           className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 pb-16 pt-6 scroll-mt-4"
         >
+          {products.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center sm:py-28">
+              <p className="font-display italic text-lg text-text-muted sm:text-xl">
+                {emptyTitle}
+              </p>
+              <p className="mt-2 max-w-md font-body text-sm text-text-secondary">
+                {emptyBody}
+              </p>
+              <Link
+                href="/saris"
+                className={cn(
+                  "mt-7 inline-flex items-center gap-2 rounded-md border-[1.5px] border-cta-fill px-6 py-3",
+                  "font-body text-[11px] font-medium uppercase tracking-[0.2em] text-cta-fill transition-colors duration-300",
+                  "hover:bg-cta-fill hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cta-fill/30",
+                )}
+              >
+                Browse All Sarees
+              </Link>
+            </div>
+          ) : (
+            <>
           {/* Sort bar */}
           <div className="mb-6 sm:mb-8 flex items-center justify-between">
             <div className="relative" ref={sortRef}>
@@ -226,6 +256,8 @@ export function SareeListingPage({ title, subtitle, products }: SareeListingPage
                 <ChevronRight className="h-4 w-4" />
               </PageBtn>
             </div>
+          )}
+            </>
           )}
         </div>
       </main>

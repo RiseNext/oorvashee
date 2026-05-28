@@ -202,3 +202,17 @@
     color: #ffffff;
   }
 }
+
+/* Accessibility: honour the OS "reduce motion" preference. Only affects users
+   who have explicitly requested it — the approved animations are unchanged for
+   everyone else. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

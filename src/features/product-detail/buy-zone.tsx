@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/format";
+import { siteConfig } from "@/config/site";
 import type { ProductDetailData } from "./data";
 
 /* ── Star rating ── */
@@ -76,6 +77,11 @@ export interface BuyZoneProps {
   onColorChange: (i: number) => void;
   onFabricChange: (f: string) => void;
   onQuantityChange: (q: number) => void;
+  onAddToCart?: () => void;
+  onBuyNow?: () => void;
+  adding?: boolean;
+  canBuy?: boolean;
+  outOfStock?: boolean;
 }
 
 export function BuyZone({
@@ -88,6 +94,11 @@ export function BuyZone({
   onColorChange,
   onFabricChange,
   onQuantityChange,
+  onAddToCart,
+  onBuyNow,
+  adding = false,
+  canBuy = true,
+  outOfStock = false,
 }: BuyZoneProps) {
   const hasDiscount = typeof product.mrp === "number" && product.mrp > product.price;
   const discount = hasDiscount
@@ -109,7 +120,8 @@ export function BuyZone({
       const msg = encodeURIComponent(
         `Hi, I'm interested in ${product.name} (${product.code}): ${window.location.href}`,
       );
-      window.open(`https://wa.me/910000000000?text=${msg}`, "_blank");
+      const waNumber = siteConfig.contact.whatsapp.replace(/\D/g, "");
+      window.open(`https://wa.me/${waNumber}?text=${msg}`, "_blank");
     }
   }
 
@@ -146,17 +158,21 @@ export function BuyZone({
         </div>
       </div>
 
-      {/* Rating */}
-      <StarRating rating={product.rating} count={product.reviewCount} />
+      {/* Rating — hidden until a review system exists (no fabricated stars) */}
+      {product.reviewCount > 0 && (
+        <StarRating rating={product.rating} count={product.reviewCount} />
+      )}
 
       {/* Name + code */}
       <div>
         <h1 className="font-display text-2xl font-semibold leading-tight text-text-primary sm:text-3xl lg:text-4xl">
           {product.name}
         </h1>
-        <p className="mt-1.5 font-body text-[11px] uppercase tracking-[0.18em] text-text-muted">
-          Code: {product.code}
-        </p>
+        {product.code && (
+          <p className="mt-1.5 font-body text-[11px] uppercase tracking-[0.18em] text-text-muted">
+            Code: {product.code}
+          </p>
+        )}
       </div>
 
       {/* Price */}
@@ -177,77 +193,83 @@ export function BuyZone({
           )}
         </div>
         <p className="mt-1 font-body text-xs text-text-muted">
-          Inclusive of all taxes. Free shipping over ₹1,499.
+          Inclusive of all taxes. Free shipping over {formatPrice(siteConfig.freeShippingThreshold)}.
         </p>
       </div>
 
       <div className="h-px bg-border-light" />
 
       {/* Size */}
-      <div>
-        <div className="mb-2.5 flex items-center justify-between">
-          <span className="font-body text-sm font-semibold uppercase tracking-[0.1em] text-text-primary">
-            Size
-          </span>
-          <button
-            type="button"
-            className="font-body text-xs text-cta-fill underline underline-offset-2 transition-colors hover:text-cta-fill-hover"
-          >
-            Size Chart
-          </button>
+      {product.sizes.length > 0 && (
+        <div>
+          <div className="mb-2.5 flex items-center justify-between">
+            <span className="font-body text-sm font-semibold uppercase tracking-[0.1em] text-text-primary">
+              Size
+            </span>
+            <button
+              type="button"
+              className="font-body text-xs text-cta-fill underline underline-offset-2 transition-colors hover:text-cta-fill-hover"
+            >
+              Size Chart
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {product.sizes.map((size) => (
+              <PillBtn key={size} active={selectedSize === size} onClick={() => onSizeChange(size)}>
+                {size}
+              </PillBtn>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {product.sizes.map((size) => (
-            <PillBtn key={size} active={selectedSize === size} onClick={() => onSizeChange(size)}>
-              {size}
-            </PillBtn>
-          ))}
-        </div>
-      </div>
+      )}
 
       {/* Color — image swatches */}
-      <div>
-        <p className="mb-2.5 font-body text-sm font-semibold uppercase tracking-[0.1em] text-text-primary">
-          Color{selectedColor !== null ? ` — ${product.colors[selectedColor].label}` : ""}
-        </p>
-        <div className="flex flex-wrap gap-2.5">
-          {product.colors.map((color, i) => (
-            <button
-              key={color.label}
-              type="button"
-              aria-label={color.label}
-              onClick={() => onColorChange(i)}
-              className={cn(
-                "relative h-14 w-14 overflow-hidden rounded-xl border-2 transition-all duration-200",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60",
-                selectedColor === i
-                  ? "border-[var(--gold)] shadow-[0_0_0_2px_var(--gold)]"
-                  : "border-border-light hover:border-border-focus",
-              )}
-            >
-              <Image src={color.swatch} alt={color.label} fill sizes="56px" className="object-cover" />
-            </button>
-          ))}
+      {product.colors.length > 0 && (
+        <div>
+          <p className="mb-2.5 font-body text-sm font-semibold uppercase tracking-[0.1em] text-text-primary">
+            Color{selectedColor !== null ? ` — ${product.colors[selectedColor].label}` : ""}
+          </p>
+          <div className="flex flex-wrap gap-2.5">
+            {product.colors.map((color, i) => (
+              <button
+                key={color.label}
+                type="button"
+                aria-label={color.label}
+                onClick={() => onColorChange(i)}
+                className={cn(
+                  "relative h-14 w-14 overflow-hidden rounded-xl border-2 transition-all duration-200",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60",
+                  selectedColor === i
+                    ? "border-[var(--gold)] shadow-[0_0_0_2px_var(--gold)]"
+                    : "border-border-light hover:border-border-focus",
+                )}
+              >
+                <Image src={color.swatch} alt={color.label} fill sizes="56px" className="object-cover" />
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Fabric */}
-      <div>
-        <p className="mb-2.5 font-body text-sm font-semibold uppercase tracking-[0.1em] text-text-primary">
-          Fabric
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {product.fabrics.map((fabric) => (
-            <PillBtn
-              key={fabric}
-              active={selectedFabric === fabric}
-              onClick={() => onFabricChange(fabric)}
-            >
-              {fabric}
-            </PillBtn>
-          ))}
+      {product.fabrics.length > 0 && (
+        <div>
+          <p className="mb-2.5 font-body text-sm font-semibold uppercase tracking-[0.1em] text-text-primary">
+            Fabric
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {product.fabrics.map((fabric) => (
+              <PillBtn
+                key={fabric}
+                active={selectedFabric === fabric}
+                onClick={() => onFabricChange(fabric)}
+              >
+                {fabric}
+              </PillBtn>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Quantity */}
       <div>
@@ -281,20 +303,26 @@ export function BuyZone({
       <div className="flex gap-3 pt-1">
         <button
           type="button"
+          onClick={onAddToCart}
+          disabled={adding || !canBuy}
           className={cn(
             "h-12 flex-1 rounded-full border-2 border-text-primary font-body text-sm font-semibold uppercase tracking-[0.1em] text-text-primary",
             "transition-colors duration-200 hover:bg-text-primary hover:text-white",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-primary/40",
+            "disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-text-primary",
           )}
         >
-          Add to Cart
+          {outOfStock ? "Sold Out" : adding ? "Adding…" : "Add to Cart"}
         </button>
         <button
           type="button"
+          onClick={onBuyNow}
+          disabled={adding || !canBuy}
           className={cn(
             "h-12 flex-1 rounded-full bg-text-primary font-body text-sm font-semibold uppercase tracking-[0.1em] text-white",
             "transition-colors duration-200 hover:bg-bg-dark",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-primary/40",
+            "disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-text-primary",
           )}
         >
           Buy It Now

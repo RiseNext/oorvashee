@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { CartLine, CartTotals } from "@/types";
+import type { CartLine } from "@/types";
 
 interface CartState {
   lines: CartLine[];
@@ -65,22 +65,6 @@ export const useCartStore = create<CartState>()(
   ),
 );
 
-export function selectCartCount(state: CartState) {
-  return state.lines.reduce((sum, l) => sum + l.quantity, 0);
-}
-
-export function selectCartTotals(state: CartState): CartTotals {
-  const subtotal = state.lines.reduce(
-    (sum, l) => sum + l.unitPrice * l.quantity,
-    0,
-  );
-  const compareSubtotal = state.lines.reduce(
-    (sum, l) => sum + (l.compareAtUnitPrice ?? l.unitPrice) * l.quantity,
-    0,
-  );
-  const discount = Math.max(0, compareSubtotal - subtotal);
-  const shipping = subtotal === 0 || subtotal >= 2999 ? 0 : 149;
-  const tax = 0;
-  const total = subtotal + shipping + tax;
-  return { subtotal, discount, shipping, tax, total };
-}
+// NB: cart counts/subtotals are derived in `useCart` (unified guest+server).
+// Authoritative shipping/tax/discount come from `/checkout/quote` (F4) — there
+// is intentionally no client-side shipping math here anymore.

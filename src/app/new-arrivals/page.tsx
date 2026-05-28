@@ -1,8 +1,13 @@
 import { NewArrivalsListingPage } from "@/features/new-arrivals-page/new-arrivals-listing-page";
-import { NEW_ARRIVALS_PAGE_PRODUCTS } from "@/features/new-arrivals-page/data";
+import { listProducts } from "@/lib/api/products";
+import { toCardProducts } from "@/lib/catalog/presenters";
 
+export const dynamic = "force-dynamic";
 export const metadata = { title: "New Arrivals" };
 
-export default function NewArrivalsPage() {
-  return <NewArrivalsListingPage products={NEW_ARRIVALS_PAGE_PRODUCTS} />;
+const CATALOG_PAGE_SIZE = 100;
+
+export default async function NewArrivalsPage() {
+  const page = await listProducts({ sort: "newest", pageSize: CATALOG_PAGE_SIZE });
+  return <NewArrivalsListingPage products={toCardProducts(page.items)} />;
 }

@@ -6,16 +6,26 @@ import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 
 import { OrnamentalDivider } from "@/components/shared/ornamental-divider";
-import { ProductCard } from "@/components/shared/product-card";
+import { ProductCard, type Product as CardProduct } from "@/components/shared/product-card";
 import { fadeUp, stagger } from "@/animations/fade";
 import { cn } from "@/lib/utils";
 
-import { SAREE_COLLECTIONS } from "../data/collections";
+/** A curated home "Collection" tab backed by real catalog products. */
+export interface HomeCollection {
+  id: string;
+  label: string;
+  href: string;
+  products: CardProduct[];
+}
 
-export function ShopByCollection() {
-  const [activeId, setActiveId] = useState<string>(SAREE_COLLECTIONS[0].id);
-  const active =
-    SAREE_COLLECTIONS.find((c) => c.id === activeId) ?? SAREE_COLLECTIONS[0];
+export function ShopByCollection({ collections }: { collections: HomeCollection[] }) {
+  // The parent drops empty collections; if everything is empty (e.g. backend
+  // unavailable) the whole section hides rather than showing an empty shell.
+  const [activeId, setActiveId] = useState<string>(collections[0]?.id ?? "");
+
+  if (collections.length === 0) return null;
+
+  const active = collections.find((c) => c.id === activeId) ?? collections[0];
 
   return (
     <section
@@ -65,7 +75,7 @@ export function ShopByCollection() {
               "sm:justify-center sm:gap-1 sm:snap-none",
             )}
           >
-            {SAREE_COLLECTIONS.map((category) => {
+            {collections.map((category) => {
               const isActive = category.id === activeId;
               return (
                 <button

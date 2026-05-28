@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Navbar } from "@/features/navbar";
 import { OrnamentalDivider } from "@/components/shared/ornamental-divider";
@@ -118,6 +119,28 @@ export function NewArrivalsListingPage({ products }: NewArrivalsListingPageProps
           ref={gridRef}
           className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 pb-16 pt-6 scroll-mt-4"
         >
+          {products.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center sm:py-28">
+              <p className="font-display italic text-lg text-text-muted sm:text-xl">
+                Fresh weaves are on their way.
+              </p>
+              <p className="mt-2 max-w-md font-body text-sm text-text-secondary">
+                New arrivals will appear here as they come off the loom. Explore
+                the full collection in the meantime.
+              </p>
+              <Link
+                href="/saris"
+                className={cn(
+                  "mt-7 inline-flex items-center gap-2 rounded-md border-[1.5px] border-cta-fill px-6 py-3",
+                  "font-body text-[11px] font-medium uppercase tracking-[0.2em] text-cta-fill transition-colors duration-300",
+                  "hover:bg-cta-fill hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cta-fill/30",
+                )}
+              >
+                Browse All Sarees
+              </Link>
+            </div>
+          ) : (
+            <>
           {/* Sort bar */}
           <div className="mb-6 sm:mb-8 flex items-center justify-between">
             <div className="relative" ref={sortRef}>
@@ -221,6 +244,8 @@ export function NewArrivalsListingPage({ products }: NewArrivalsListingPageProps
                 <ChevronRight className="h-4 w-4" />
               </PageBtn>
             </div>
+          )}
+            </>
           )}
         </div>
       </main>

@@ -36,6 +36,12 @@ export interface ProductSummary {
   rating?: ProductReviewSummary;
   collection?: { slug: string; title: string };
   fabric?: string;
+  /**
+   * Backend availability flag (`available`). Optional so existing mock data
+   * stays valid; treat `undefined` as available. Drives the "sold out"
+   * state once real catalog reads land (F1).
+   */
+  available?: boolean;
 }
 
 export interface Product extends ProductSummary {
@@ -43,10 +49,17 @@ export interface Product extends ProductSummary {
   story?: string;
   images: ProductImage[];
   variants: ProductVariant[];
+  /** Backend free-form tags (real product data — drives spec/highlights). */
+  tags?: string[];
+  /** The product's taxonomy memberships (slug+name+kind) for breadcrumb + related. */
+  categories?: { slug: string; name: string; kind: string }[];
+  /** Backend SEO overrides for `generateMetadata`. */
+  seo?: { title?: string; description?: string };
   attributes: {
     fabric?: string;
     weave?: string;
     region?: string;
+    occasion?: string;
     blousePiece?: boolean;
     length?: string;
     width?: string;
@@ -66,6 +79,10 @@ export interface Collection {
 
 export interface ProductListQuery {
   collection?: string;
+  /** Free-text search (backend `/products?q=`). */
+  q?: string;
+  /** Backend category slugs (OR-filtered). Takes precedence over `collection`. */
+  categorySlugs?: string[];
   fabric?: string[];
   priceMin?: number;
   priceMax?: number;

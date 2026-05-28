@@ -69,7 +69,7 @@ The soft linen fabric ensures breathability and ease of draping, making it a fav
   returnPolicy: `We accept returns within 7 days of delivery, provided the item is unused, unwashed, and in original packaging with all tags intact.
 
 To initiate a return, contact us at hello@oorvashee.com with your order number. Exchange requests are processed within 5–7 business days of receiving the returned item.`,
-  shippingInfo: `Orders are dispatched within 1–2 business days.\n\nEstimated delivery:\n• Metro cities: 2–4 business days\n• Tier 2 / Tier 3: 4–7 business days\n• International: 10–14 business days\n\nFree shipping on orders above ₹1,499.`,
+  shippingInfo: `Orders are dispatched within 1–2 business days.\n\nEstimated delivery:\n• Metro cities: 2–4 business days\n• Tier 2 / Tier 3: 4–7 business days\n• International: 10–14 business days\n\nFree shipping on orders above ₹3,000.`,
   manufacturedBy: `Oorvashee Saree House\nKanchipuram, Tamil Nadu — 631 501\nGSTIN: 22AAAAA0000A1Z5`,
   customerCare: `Email: hello@oorvashee.com\nPhone / WhatsApp: +91 00000 00000\nMon–Sat, 10 AM – 7 PM IST`,
 };

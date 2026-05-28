@@ -1,0 +1,119 @@
+"use client";
+
+import { useRef, useState } from "react";
+import Image from "next/image";
+import { UploadCloud, X, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
+import { useApiClient } from "@/hooks/use-api-client";
+import * as admin from "@/lib/admin/api";
+import { cn } from "@/lib/utils";
+import type { AdminImage } from "@/types/admin";
+
+/**
+ * Cloudinary signed-upload manager. Per file: sign → upload to Cloudinary →
+ * attach (backend re-verifies the signature). Images render in `position`
+ * order; first upload becomes primary. `onChanged` refetches the product.
+ */
+export function ProductMedia({
+  productId,
+  images,
+  onChanged,
+}: {
+  productId: string;
+  images: AdminImage[];
+  onChanged: () => void;
+}) {
+  const { authedFetch } = useApiClient();
+  const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  async function upload(files: FileList | null) {
+    if (!files || files.length === 0 || uploading) return;
+    setUploading(true);
+    try {
+      let primaryCount = images.length;
+      for (const file of Array.from(files)) {
+        const sig = await admin.signUpload(authedFetch, productId);
+        const result = await admin.uploadToCloudinary(sig, file);
+        await admin.attachProductImage(authedFetch, productId, result, { isPrimary: primaryCount === 0 });
+        primaryCount += 1;
+      }
+      onChanged();
+      toast.success(files.length > 1 ? "Images uploaded" : "Image uploaded");
+    } catch {
+      toast.error("Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function remove(id: string) {
+    try {
+      await admin.deleteProductImage(authedFetch, productId, id);
+      onChanged();
+    } catch {
+      toast.error("Couldn't delete that image.");
+    }
+  }
+
+  return (
+    <div>
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+        {images.map((img) => (
+          <div key={img.id} className="group relative aspect-[4/5] overflow-hidden rounded-lg border border-border-light bg-bg-secondary">
+            <Image src={img.url} alt={img.altText ?? ""} fill sizes="160px" className="object-cover" />
+            {img.isPrimary && (
+              <span className="absolute left-1.5 top-1.5 rounded-full bg-cta-fill px-2 py-0.5 font-body text-[9px] font-medium uppercase tracking-[0.1em] text-white">
+                Primary
+              </span>
+            )}
+            <button
+              type="button"
+              aria-label="Delete image"
+              onClick={() => remove(img.id)}
+              className="absolute right-1.5 top-1.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-text-primary opacity-0 shadow-sm transition-opacity hover:text-cta-fill group-hover:opacity-100"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ))}
+
+        {/* Upload tile */}
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOver(false);
+            upload(e.dataTransfer.files);
+          }}
+          className={cn(
+            "flex aspect-[4/5] flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed text-text-muted transition-colors",
+            dragOver ? "border-cta-fill bg-cta-fill/5 text-cta-fill" : "border-border-default hover:border-cta-fill hover:text-cta-fill",
+          )}
+        >
+          {uploading ? <Loader2 className="h-6 w-6 animate-spin" /> : <UploadCloud className="h-6 w-6" />}
+          <span className="px-2 text-center font-body text-[11px]">
+            {uploading ? "Uploading…" : "Drop or click"}
+          </span>
+        </button>
+      </div>
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        onChange={(e) => upload(e.target.files)}
+      />
+    </div>
+  );
+}

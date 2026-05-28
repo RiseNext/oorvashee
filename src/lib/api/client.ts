@@ -9,10 +9,21 @@ type QueryValue =
   | undefined
   | Array<string | number | boolean>;
 
-type RequestOptions = Omit<RequestInit, "body"> & {
+export type RequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
   query?: Record<string, QueryValue>;
+  /** Clerk JWT for authenticated calls. Injected by `useApiClient` (F2). */
+  token?: string | null;
+  /** Required on `/checkout/orders` + `/payments/verify` (F4). */
+  idempotencyKey?: string;
 };
+
+/**
+ * The token-injecting fetch returned by `useApiClient().authedFetch`. API
+ * modules for authenticated resources (cart, wishlist, account) accept this so
+ * the token + 401-retry logic live in one place.
+ */
+export type AuthedFetch = <T>(path: string, options?: RequestOptions) => Promise<T>;
 
 function buildUrl(path: string, query?: RequestOptions["query"]) {
   const base = clientEnv.NEXT_PUBLIC_API_BASE_URL.replace(/\/$/, "");
@@ -34,29 +45,30 @@ export async function apiFetch<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { body, query, headers, ...rest } = options;
+  const { body, query, headers, token, idempotencyKey, ...rest } = options;
+
+  const finalHeaders: Record<string, string> = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    ...(headers as Record<string, string> | undefined),
+  };
+  if (token) finalHeaders.Authorization = `Bearer ${token}`;
+  if (idempotencyKey) finalHeaders["Idempotency-Key"] = idempotencyKey;
+
   const res = await fetch(buildUrl(path, query), {
     ...rest,
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      ...headers,
-    },
+    headers: finalHeaders,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
   if (!res.ok) {
-    let details: unknown;
+    let parsed: unknown;
     try {
-      details = await res.json();
+      parsed = await res.json();
     } catch {
-      details = await res.text().catch(() => undefined);
+      parsed = await res.text().catch(() => undefined);
     }
-    throw new ApiError(
-      `Request failed: ${res.status} ${res.statusText}`,
-      res.status,
-      details,
-    );
+    throw ApiError.from(res.status, res.statusText, parsed);
   }
 
   if (res.status === 204) return undefined as T;

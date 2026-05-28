@@ -3,11 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence } from "motion/react";
 import { Heart, Menu, Search, User, X } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
+import { SIGN_IN_URL } from "@/lib/auth/config";
+import { useAuthSession } from "@/lib/auth/use-auth-session";
 import { CartButton } from "./cart-button";
 import { MobileMenuPanel } from "./mobile-menu-panel";
 import { MobileSearchPanel } from "./mobile-search-panel";
@@ -27,10 +29,27 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [visible, setVisible] = useState(true);
+  const [query, setQuery] = useState("");
   const lastScrollY = useRef(0);
   const pathname = usePathname();
+  const router = useRouter();
 
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = query.trim();
+    if (!q) return;
+    router.push(`/search?q=${encodeURIComponent(q)}`);
+  };
+
+  // Auth-aware account target: known-signed-out → sign-in, otherwise account
+  // (the page + middleware guard it). Same icon either way → no flicker/shift.
+  const { isLoaded, isSignedIn } = useAuthSession();
+  const accountHref = isLoaded && !isSignedIn ? SIGN_IN_URL : "/account";
+
+  // Close any open menu/search when the route changes — syncing UI to
+  // navigation is a legitimate effect, not a derived-state smell.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileOpen(false);
     setSearchOpen(false);
   }, [pathname]);
@@ -67,14 +86,24 @@ export function Navbar() {
         <div className="hidden md:flex items-center bg-[#54100D] px-8 lg:px-12 xl:px-16 py-3">
           {/* Left: search bar */}
           <div className="flex-1">
-            <label className="flex w-72 lg:w-96 items-center gap-3 rounded-full border-2 border-white/70 bg-white/10 px-5 py-2.5 cursor-text">
-              <Search className="h-[17px] w-[17px] shrink-0 text-white" strokeWidth={1.8} />
+            <form
+              role="search"
+              onSubmit={submitSearch}
+              className="flex w-72 lg:w-96 items-center gap-3 rounded-full border-2 border-white/70 bg-white/10 px-5 py-2.5"
+            >
+              <button type="submit" aria-label="Search" className="shrink-0 outline-none">
+                <Search className="h-[17px] w-[17px] text-white" strokeWidth={1.8} />
+              </button>
               <input
                 type="search"
+                name="q"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search sarees…"
+                aria-label="Search sarees"
                 className="w-full bg-transparent text-[15px] text-white placeholder:text-white/60 outline-none font-display italic"
               />
-            </label>
+            </form>
           </div>
 
           {/* Center: logo */}
@@ -95,7 +124,7 @@ export function Navbar() {
           <div className="flex-1 flex justify-end items-center gap-1">
             <TooltipProvider delay={300}>
               <Tooltip>
-                <TooltipTrigger render={<Link href="/account" aria-label="Account" className={desktopIconBtn} />}>
+                <TooltipTrigger render={<Link href={accountHref} aria-label="Account" className={desktopIconBtn} />}>
                   <User className="h-[24px] w-[24px]" strokeWidth={1.5} />
                 </TooltipTrigger>
                 <TooltipContent side="bottom" sideOffset={8}>Account</TooltipContent>

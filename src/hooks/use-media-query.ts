@@ -1,23 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 /**
- * Tracks a CSS media query.
+ * Tracks a CSS media query via `useSyncExternalStore` — the React 19 way to
+ * read from an external source without the cascading-render / hydration
+ * pitfalls of `setState` inside an effect.
  *
- * Defaults to `false` during SSR / first paint so server and client output
- * agree — components must tolerate the first render being mobile-like.
+ * The server snapshot is `false`, so SSR / first paint agree (components
+ * must tolerate the first render being mobile-like); the real value is read
+ * synchronously on the client after hydration.
  */
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false);
+  const subscribe = useCallback(
+    (onChange: () => void) => {
+      const mql = window.matchMedia(query);
+      mql.addEventListener("change", onChange);
+      return () => mql.removeEventListener("change", onChange);
+    },
+    [query],
+  );
 
-  useEffect(() => {
-    const mql = window.matchMedia(query);
-    setMatches(mql.matches);
-    const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
-    mql.addEventListener("change", handler);
-    return () => mql.removeEventListener("change", handler);
-  }, [query]);
+  const getSnapshot = useCallback(
+    () => window.matchMedia(query).matches,
+    [query],
+  );
 
-  return matches;
+  // Server / pre-hydration snapshot: assume not-matching (mobile-first).
+  const getServerSnapshot = useCallback(() => false, []);
+
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

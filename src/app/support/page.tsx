@@ -1,0 +1,8 @@
+import type { Metadata } from "next";
+import { SupportView } from "@/features/support/support-view";
+
+export const metadata: Metadata = { title: "Help & Support" };
+
+export default function SupportPage() {
+  return <SupportView />;
+}

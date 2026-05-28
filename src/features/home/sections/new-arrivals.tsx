@@ -6,13 +6,15 @@ import { ArrowRight } from "lucide-react";
 
 import { OrnamentalDivider } from "@/components/shared/ornamental-divider";
 import { SectionLabel } from "@/components/shared/section-label";
-import { ProductCard } from "@/components/shared/product-card";
+import { ProductCard, type Product as CardProduct } from "@/components/shared/product-card";
 import { fadeUp, stagger } from "@/animations/fade";
 import { cn } from "@/lib/utils";
 
-import { NEW_ARRIVALS } from "../data/new-arrivals";
+export function NewArrivals({ products }: { products: CardProduct[] }) {
+  // Landing strip hides entirely when there's nothing fresh to show (or the
+  // catalog read failed) rather than rendering an empty rail.
+  if (products.length === 0) return null;
 
-export function NewArrivals() {
   return (
     <section
       aria-labelledby="new-arrivals-heading"
@@ -64,7 +66,7 @@ export function NewArrivals() {
             "lg:grid lg:grid-cols-5 lg:gap-6 lg:overflow-visible lg:pb-0 xl:gap-7 2xl:gap-8",
           )}
         >
-          {NEW_ARRIVALS.map((product) => (
+          {products.map((product) => (
             <li
               key={product.id}
               className={cn(

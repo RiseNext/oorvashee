@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ShoppingBag } from "lucide-react";
-import { useCartStore, selectCartCount } from "@/store/cart-store";
+import { useCart } from "@/hooks/use-cart";
 import { cn } from "@/lib/utils";
 
 interface CartButtonProps {
@@ -14,9 +14,11 @@ interface CartButtonProps {
 export function CartButton({ className, variant = "default" }: CartButtonProps) {
   // Avoid SSR hydration mismatch: render 0 on the server, real count after mount.
   const [hydrated, setHydrated] = useState(false);
+  // Intentional one-shot mount flag — the canonical hydration-guard pattern.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setHydrated(true), []);
-  const count = useCartStore(selectCartCount);
-  const display = hydrated ? count : 0;
+  const { cart } = useCart();
+  const display = hydrated ? cart.itemCount : 0;
 
   return (
     <Link

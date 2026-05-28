@@ -14,6 +14,9 @@ interface StickyHeaderProps {
   onSizeChange: (s: string) => void;
   onColorChange: (i: number) => void;
   onFabricChange: (f: string) => void;
+  onAddToCart?: () => void;
+  adding?: boolean;
+  canBuy?: boolean;
 }
 
 export function StickyHeader({
@@ -25,6 +28,9 @@ export function StickyHeader({
   onSizeChange,
   onColorChange,
   onFabricChange,
+  onAddToCart,
+  adding = false,
+  canBuy = true,
 }: StickyHeaderProps) {
   return (
     <div
@@ -86,9 +92,11 @@ export function StickyHeader({
         {/* Add to cart */}
         <button
           type="button"
-          className="shrink-0 rounded-full bg-text-primary px-5 py-2 font-body text-xs font-semibold uppercase tracking-[0.1em] text-white transition-colors hover:bg-bg-dark focus-visible:outline-none"
+          onClick={onAddToCart}
+          disabled={adding || !canBuy}
+          className="shrink-0 rounded-full bg-text-primary px-5 py-2 font-body text-xs font-semibold uppercase tracking-[0.1em] text-white transition-colors hover:bg-bg-dark focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Add to Cart
+          {adding ? "Adding…" : "Add to Cart"}
         </button>
       </div>
     </div>

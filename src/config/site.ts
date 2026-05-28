@@ -15,6 +15,10 @@ export const siteConfig = {
   ogImage: "/og.jpg",
   locale: "en-IN",
   currency: "INR",
+  // Free-shipping threshold (₹). Frontend marketing copy only — the backend
+  // currently returns shipping = 0; single-sourced here so cart / PDP / support
+  // never disagree.
+  freeShippingThreshold: 3000,
   contact: {
     email: "hello@oorvashee.com",
     phone: "+91 97037 66779",
@@ -60,3 +64,16 @@ export const siteConfig = {
 } as const;
 
 export type SiteConfig = typeof siteConfig;
+
+export interface VideoItem {
+  /** YouTube video ID (the part after `watch?v=`). */
+  id: string;
+  title: string;
+}
+
+/**
+ * Featured films for the `/video` page. Populate with real YouTube video IDs
+ * to render an embed grid; until then the page links out to the channel
+ * (`siteConfig.social.youtube`). Intentionally empty — no placeholder IDs.
+ */
+export const videoGallery: VideoItem[] = [];

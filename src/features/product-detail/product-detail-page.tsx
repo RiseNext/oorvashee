@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Navbar } from "@/features/navbar";
 import { ImageGallery } from "./image-gallery";
 import { BuyZone } from "./buy-zone";
@@ -10,45 +11,121 @@ import { StickyHeader } from "./sticky-header";
 import { ProductsSection } from "./products-section";
 import { BrandStory } from "./brand-story";
 import { ReviewsSection } from "./reviews-section";
-import type { Product } from "@/components/shared/product-card";
+import type { Product as CardProduct } from "@/components/shared/product-card";
 import type { ProductDetailData } from "./data";
 import { SIMILAR_PRODUCTS, YMAL_PRODUCTS } from "./data";
-import { siteConfig, type NavItem } from "@/config/site";
+import { useCart } from "@/hooks/use-cart";
+import { PLACEHOLDER_IMAGE } from "@/lib/api/mappers";
+import type { ProductColor } from "./data";
+import type { ProductVariant } from "@/types/product";
 
-// Flatten all nav entries once at module level so renders are cheap
-function flattenNav(items: readonly NavItem[]): { href: string; label: string }[] {
-  return items.flatMap((item) => [
-    { href: item.href, label: item.label },
-    ...(item.children ? flattenNav(item.children) : []),
-  ]);
-}
-const ALL_NAV_ITEMS = flattenNav(siteConfig.nav);
-
-// Attach the correct category-scoped href to each related product
-function withHref(products: Omit<Product, "href">[], basePath: string): Product[] {
+// Fallback only: attach an href to the legacy mock fixtures used when no real
+// related products are supplied (offline mock mode). Real related products
+// arrive already carrying canonical `/product/[slug]` hrefs.
+function withHref(products: Omit<CardProduct, "href">[], basePath: string): CardProduct[] {
   return products.map((p) => ({ ...p, href: `${basePath}/${p.id}` }));
 }
 
-export function ProductDetailPage({ product }: { product: ProductDetailData }) {
-  const pathname = usePathname();
+/** Resolve the selected colour/fabric/size combination to a concrete variant. */
+function resolveVariant(
+  variants: ProductVariant[] | undefined,
+  colors: ProductColor[],
+  selectedColor: number | null,
+  selectedFabric: string | null,
+  selectedSize: string | null,
+): ProductVariant | undefined {
+  if (!variants || variants.length === 0) return undefined;
+  const colorLabel = selectedColor != null ? colors[selectedColor]?.label : undefined;
+  const match = variants.find(
+    (v) =>
+      (!colorLabel || v.options.color === colorLabel) &&
+      (!selectedFabric || v.options.fabric === selectedFabric) &&
+      (!selectedSize || v.options.size === selectedSize),
+  );
+  return match ?? variants[0];
+}
+
+export interface ProductDetailPageProps {
+  product: ProductDetailData;
+  /** Domain variants (id + options + stock) — drives add-to-cart resolution. */
+  variants?: ProductVariant[];
+  /** Canonical category href for the breadcrumb + "View all" (e.g. `/saris/banaras-sarees`). */
+  categoryHref?: string;
+  /** Category label for the breadcrumb (e.g. "Banaras Sarees"). */
+  categoryLabel?: string;
+  /** Real "similar" products. Cards already carry `/product/[slug]` hrefs. */
+  similar?: CardProduct[];
+  /** Real "you may also like" products. */
+  youMayAlsoLike?: CardProduct[];
+}
+
+export function ProductDetailPage({
+  product,
+  variants,
+  categoryHref,
+  categoryLabel,
+  similar,
+  youMayAlsoLike,
+}: ProductDetailPageProps) {
+  // Default to the first colour so a variant always resolves for add-to-cart.
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [selectedColor, setSelectedColor] = useState<number | null>(null);
+  const [selectedColor, setSelectedColor] = useState<number | null>(
+    product.colors.length > 0 ? 0 : null,
+  );
   const [selectedFabric, setSelectedFabric] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [stickyVisible, setStickyVisible] = useState(false);
+  const [adding, setAdding] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
 
-  // Derive category from URL: strip last segment (product slug) to get the parent path.
-  // Works for /saris/{category}/{slug}, /new-arrivals/{slug}, etc.
-  const segments = pathname.split("/").filter(Boolean);
-  const parentPath = segments.length > 1 ? "/" + segments.slice(0, -1).join("/") : "/";
-  const parentNav = ALL_NAV_ITEMS.find((n) => n.href === parentPath);
+  const router = useRouter();
+  const { addItem } = useCart();
+
+  const variant = resolveVariant(
+    variants,
+    product.colors,
+    selectedColor,
+    selectedFabric,
+    selectedSize,
+  );
+  const outOfStock = variant ? variant.inStock === false : false;
+  const canBuy = Boolean(variant) && !outOfStock;
+
+  async function handleAddToCart(buyNow: boolean) {
+    if (!variant || outOfStock) {
+      toast.error(outOfStock ? "This piece just sold out." : "Please select your options.");
+      return;
+    }
+    setAdding(true);
+    try {
+      await addItem({
+        variantId: variant.id,
+        productId: product.id,
+        slug: product.slug,
+        title: product.name,
+        variantLabel: variant.title,
+        image: { url: product.images[0] ?? PLACEHOLDER_IMAGE, alt: product.name },
+        unitPrice: variant.price || product.price,
+        quantity,
+      });
+      if (buyNow) router.push("/checkout");
+    } finally {
+      setAdding(false);
+    }
+  }
+
+  // Category linking comes from the server (which knows the product's real
+  // category), falling back to whatever the adapter put on the product.
   const resolvedProduct: ProductDetailData = {
     ...product,
-    // Store the full parent href so BuyZone can use it directly as a Link href
-    categorySlug: parentPath,
-    category: parentNav?.label ?? product.category,
+    categorySlug: categoryHref ?? product.categorySlug,
+    category: categoryLabel ?? product.category,
   };
+
+  const similarProducts =
+    similar ?? withHref(SIMILAR_PRODUCTS, resolvedProduct.categorySlug);
+  const ymalProducts =
+    youMayAlsoLike ?? withHref(YMAL_PRODUCTS, resolvedProduct.categorySlug);
 
   /* Show sticky header once the buy zone scrolls out of view */
   useEffect(() => {
@@ -75,6 +152,9 @@ export function ProductDetailPage({ product }: { product: ProductDetailData }) {
         onSizeChange={setSelectedSize}
         onColorChange={setSelectedColor}
         onFabricChange={setSelectedFabric}
+        onAddToCart={() => handleAddToCart(false)}
+        adding={adding}
+        canBuy={canBuy}
       />
 
       <main className="bg-bg-primary">
@@ -101,6 +181,11 @@ export function ProductDetailPage({ product }: { product: ProductDetailData }) {
                 onColorChange={setSelectedColor}
                 onFabricChange={setSelectedFabric}
                 onQuantityChange={setQuantity}
+                onAddToCart={() => handleAddToCart(false)}
+                onBuyNow={() => handleAddToCart(true)}
+                adding={adding}
+                canBuy={canBuy}
+                outOfStock={outOfStock}
               />
               <AccordionSections product={product} />
             </div>
@@ -108,28 +193,32 @@ export function ProductDetailPage({ product }: { product: ProductDetailData }) {
         </div>
 
         {/* ── Similar Products ── */}
-        <div className="bg-bg-secondary">
-          <ProductsSection
-            heading="Similar Products"
-            products={withHref(SIMILAR_PRODUCTS, resolvedProduct.categorySlug)}
-            viewAllHref={resolvedProduct.categorySlug}
-            headingStyle="dark-bar"
-            layout="scroll"
-          />
-        </div>
+        {similarProducts.length > 0 && (
+          <div className="bg-bg-secondary">
+            <ProductsSection
+              heading="Similar Products"
+              products={similarProducts}
+              viewAllHref={resolvedProduct.categorySlug}
+              headingStyle="dark-bar"
+              layout="scroll"
+            />
+          </div>
+        )}
 
         {/* ── Brand Story ── */}
         <BrandStory />
 
         {/* ── You May Also Like ── */}
-        <div className="bg-bg-secondary">
-          <ProductsSection
-            heading="You May Also Like"
-            products={withHref(YMAL_PRODUCTS, resolvedProduct.categorySlug)}
-            headingStyle="serif"
-            layout="scroll"
-          />
-        </div>
+        {ymalProducts.length > 0 && (
+          <div className="bg-bg-secondary">
+            <ProductsSection
+              heading="You May Also Like"
+              products={ymalProducts}
+              headingStyle="serif"
+              layout="scroll"
+            />
+          </div>
+        )}
 
         {/* ── Reviews ── */}
         <ReviewsSection />

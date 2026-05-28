@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { Heart, ShoppingBag } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/format";
 import { fadeUp } from "@/animations/fade";
+import { useWishlist } from "@/hooks/use-wishlist";
 
 // Hoisted to module scope so the motion-wrapped Link is created once,
 // not on every ProductCard render.
@@ -39,8 +41,12 @@ export function ProductCard({
   className,
   animated = true,
 }: ProductCardProps) {
-  const { code, name, price, mrp, image, href, category } = product;
+  const { id, code, name, price, mrp, image, href, category } = product;
   const hasDiscount = typeof mrp === "number" && mrp > price;
+
+  const router = useRouter();
+  const wishlist = useWishlist();
+  const inWishlist = wishlist.has(id);
 
   return (
     <MotionLink
@@ -78,22 +84,31 @@ export function ProductCard({
 
         <div className="absolute bottom-3 left-3 flex items-center gap-2">
           <ActionButton
-            label={`Add ${name} to bag`}
+            label={`View ${name} to add to bag`}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              // Sarees have variants (colour/fabric) chosen on the PDP — the
+              // card sends the shopper there to pick before adding.
+              router.push(href);
             }}
           >
             <ShoppingBag className="h-3.5 w-3.5" strokeWidth={1.75} />
           </ActionButton>
           <ActionButton
-            label={`Save ${name} to wishlist`}
+            label={inWishlist ? `Remove ${name} from wishlist` : `Save ${name} to wishlist`}
+            active={inWishlist}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              wishlist.toggle(id);
             }}
           >
-            <Heart className="h-3.5 w-3.5" strokeWidth={1.75} />
+            <Heart
+              className={cn("h-3.5 w-3.5", inWishlist && "text-cta-fill")}
+              fill={inWishlist ? "currentColor" : "none"}
+              strokeWidth={1.75}
+            />
           </ActionButton>
         </div>
       </div>
@@ -122,13 +137,16 @@ interface ActionButtonProps {
   label: string;
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
   children: React.ReactNode;
+  /** Pressed state (e.g. item already in wishlist) — for a11y. */
+  active?: boolean;
 }
 
-function ActionButton({ label, onClick, children }: ActionButtonProps) {
+function ActionButton({ label, onClick, children, active }: ActionButtonProps) {
   return (
     <button
       type="button"
       aria-label={label}
+      aria-pressed={active}
       onClick={onClick}
       className={cn(
         "inline-flex h-8 w-8 items-center justify-center rounded-full",
