@@ -244,6 +244,8 @@ export interface UploadSignature {
   resourceType: string;
   allowedFormats: string[];
   maxFileSize: number;
+  tags: string[];
+  context: Record<string, string>;
 }
 
 export function signUpload(af: AuthedFetch, entityId: string): Promise<UploadSignature> {
@@ -262,14 +264,25 @@ export function signUpload(af: AuthedFetch, entityId: string): Promise<UploadSig
     resourceType: s(d.resource_type) || "image",
     allowedFormats: (d.allowed_formats as string[]) ?? [],
     maxFileSize: Number(d.max_file_size ?? 0),
+    tags: (d.tags as string[]) ?? [],
+    context: (d.context as Record<string, string>) ?? {},
   }));
 }
 
 /**
  * Upload a file to Cloudinary with the signed envelope, returning the raw
- * Cloudinary result (the backend re-verifies its signature on attach). The
- * POSTed params MUST match the set the backend signed (folder + eager +
- * timestamp [+ public_id]).
+ * Cloudinary result (the backend re-verifies its signature on attach).
+ *
+ * Every non-`file`/`api_key`/`signature` field below is part of the backend
+ * signature, so each value MUST be stringified exactly as the backend did when
+ * signing (see app/integrations/cloudinary_client.py `_stringify`):
+ *   - lists (`eager`, `allowed_formats`, `tags`) → pipe-joined
+ *   - `max_file_size` → the integer as a string
+ *   - `context` dict → `key=value` pairs joined by `|`, in insertion order
+ *     (e.g. `context=product|entity_id=<uuid>`)
+ * Cloudinary sorts the received params itself before verifying, so the append
+ * order here is irrelevant — only the values must match. Empty params are
+ * omitted to mirror the backend's canonicalisation (which drops empty values).
  */
 export async function uploadToCloudinary(sig: UploadSignature, file: File): Promise<Dict> {
   const fd = new FormData();
@@ -278,7 +291,14 @@ export async function uploadToCloudinary(sig: UploadSignature, file: File): Prom
   fd.append("timestamp", String(sig.timestamp));
   fd.append("signature", sig.signature);
   fd.append("folder", sig.folder);
+  fd.append("max_file_size", String(sig.maxFileSize));
   if (sig.eager.length > 0) fd.append("eager", sig.eager.join("|"));
+  if (sig.allowedFormats.length > 0) fd.append("allowed_formats", sig.allowedFormats.join("|"));
+  if (sig.tags.length > 0) fd.append("tags", sig.tags.join("|"));
+  const context = Object.entries(sig.context)
+    .map(([k, v]) => `${k}=${v}`)
+    .join("|");
+  if (context) fd.append("context", context);
   if (sig.publicId) fd.append("public_id", sig.publicId);
   const res = await fetch(sig.uploadUrl, { method: "POST", body: fd });
   if (!res.ok) throw new Error("Cloudinary upload failed");
