@@ -11,6 +11,8 @@ interface StickyHeaderProps {
   selectedSize: string | null;
   selectedColor: number | null;
   selectedFabric: string | null;
+  /** Currently resolved variant id — drives the live-updated price. */
+  currentVariantId?: string | null;
   onSizeChange: (s: string) => void;
   onColorChange: (i: number) => void;
   onFabricChange: (f: string) => void;
@@ -25,6 +27,7 @@ export function StickyHeader({
   selectedSize,
   selectedColor,
   selectedFabric,
+  currentVariantId,
   onSizeChange,
   onColorChange,
   onFabricChange,
@@ -32,6 +35,11 @@ export function StickyHeader({
   adding = false,
   canBuy = true,
 }: StickyHeaderProps) {
+  // Price tracks the resolved variant for parity with BuyZone.
+  const currentVariant = currentVariantId
+    ? product.variants.find((v) => v.id === currentVariantId)
+    : undefined;
+  const displayedPrice = currentVariant?.price ?? product.price;
   return (
     <div
       aria-hidden={!visible}
@@ -59,7 +67,7 @@ export function StickyHeader({
               {product.name}
             </p>
             <p className="font-body text-xs font-bold text-cta-fill">
-              {formatPrice(product.price)}
+              {formatPrice(displayedPrice)}
             </p>
           </div>
         </div>

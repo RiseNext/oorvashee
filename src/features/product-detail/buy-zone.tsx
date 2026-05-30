@@ -72,6 +72,10 @@ export interface BuyZoneProps {
   selectedSize: string | null;
   selectedColor: number | null;
   selectedFabric: string | null;
+  /** Currently resolved variant id (axis-resolved or manually picked). */
+  currentVariantId?: string | null;
+  /** Called when the user picks a variant from the flat fallback picker. */
+  onVariantChange?: (id: string) => void;
   quantity: number;
   onSizeChange: (s: string) => void;
   onColorChange: (i: number) => void;
@@ -89,6 +93,8 @@ export function BuyZone({
   selectedSize,
   selectedColor,
   selectedFabric,
+  currentVariantId,
+  onVariantChange,
   quantity,
   onSizeChange,
   onColorChange,
@@ -100,10 +106,28 @@ export function BuyZone({
   canBuy = true,
   outOfStock = false,
 }: BuyZoneProps) {
-  const hasDiscount = typeof product.mrp === "number" && product.mrp > product.price;
+  // Resolve the currently active variant from the structured list; falls back
+  // to undefined when the product has no variants (legacy products).
+  const currentVariant = currentVariantId
+    ? product.variants.find((v) => v.id === currentVariantId)
+    : undefined;
+
+  // Displayed price prefers the selected variant's price; MRP stays at the
+  // product level (variant-level MRP is a future addition — see Phase B).
+  const displayedPrice = currentVariant?.price ?? product.price;
+  const hasDiscount = typeof product.mrp === "number" && product.mrp > displayedPrice;
   const discount = hasDiscount
-    ? Math.round(((product.mrp! - product.price) / product.mrp!) * 100)
+    ? Math.round(((product.mrp! - displayedPrice) / product.mrp!) * 100)
     : 0;
+
+  // Show the flat variant picker only when axis pickers cannot disambiguate
+  // (no color/size/fabric populated) AND there are multiple variants. For
+  // axis-driven products the existing color/size/fabric controls own the UX.
+  const showVariantFallback =
+    product.variants.length >= 2 &&
+    product.colors.length === 0 &&
+    product.sizes.length === 0 &&
+    product.fabrics.length === 0;
 
   function handleShare() {
     if (typeof navigator !== "undefined") {
@@ -171,15 +195,21 @@ export function BuyZone({
         {product.code && (
           <p className="mt-1.5 font-body text-[11px] uppercase tracking-[0.18em] text-text-muted">
             Code: {product.code}
+            {currentVariant && product.variants.length >= 2 && (
+              <span className="ml-2 text-text-secondary">
+                · SKU: {currentVariant.sku}
+              </span>
+            )}
           </p>
         )}
       </div>
 
-      {/* Price */}
+      {/* Price — uses the selected variant's price when available so the
+          number updates live as the customer switches variants. */}
       <div>
         <div className="flex items-baseline gap-3">
           <span className="font-body text-2xl font-bold text-text-primary">
-            {formatPrice(product.price)}
+            {formatPrice(displayedPrice)}
           </span>
           {hasDiscount && (
             <>
@@ -198,6 +228,48 @@ export function BuyZone({
       </div>
 
       <div className="h-px bg-border-light" />
+
+      {/* Variant fallback picker — only renders when the product has multiple
+          variants and NO color/size/fabric axes (the SKU-only case, e.g.
+          dem-av1 / dem-av2). Axis-driven products keep using the existing
+          Size/Color/Fabric pickers below; this block is invisible for them. */}
+      {showVariantFallback && (
+        <div>
+          <p className="mb-2.5 font-body text-sm font-semibold uppercase tracking-[0.1em] text-text-primary">
+            Choose Variant
+            {currentVariant && (
+              <span className="ml-2 normal-case tracking-normal text-text-muted">
+                — {currentVariant.label}
+              </span>
+            )}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {product.variants.map((v) => (
+              <button
+                key={v.id}
+                type="button"
+                aria-pressed={v.id === currentVariantId}
+                disabled={!v.available}
+                onClick={() => onVariantChange?.(v.id)}
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cta-fill/40",
+                  v.id === currentVariantId
+                    ? "border-text-primary bg-text-primary text-white"
+                    : "border-border-default text-text-secondary hover:border-text-primary hover:text-text-primary",
+                  !v.available && "cursor-not-allowed opacity-50 line-through",
+                )}
+              >
+                <span>{v.label}</span>
+                {v.price !== product.price && (
+                  <span className="text-xs opacity-80">{formatPrice(v.price)}</span>
+                )}
+                {!v.available && <span className="text-[10px] uppercase">Sold out</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Size */}
       {product.sizes.length > 0 && (

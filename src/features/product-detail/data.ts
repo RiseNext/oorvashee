@@ -5,6 +5,22 @@ export interface ProductColor {
   swatch: string;
 }
 
+/**
+ * Structured variant the storefront PDP needs to render a selector and
+ * live-update price/SKU/availability. Derived from the domain `ProductVariant`
+ * in `adapt.ts` — keeps backward compat by ALWAYS providing this list (empty
+ * for products with no variants); the buy-zone gates UI on `length >= 2`.
+ */
+export interface ProductVariantOption {
+  id: string;
+  sku: string;
+  /** Human label: "Red · Silk · M" if axes present, else falls back to SKU. */
+  label: string;
+  price: number;
+  available: boolean;
+  isDefault: boolean;
+}
+
 export interface ProductDetailData {
   id: string;
   slug: string;
@@ -20,6 +36,12 @@ export interface ProductDetailData {
   sizes: string[];
   colors: ProductColor[];
   fabrics: string[];
+  /**
+   * Every active variant in display order. Includes id, label, price,
+   * availability — buy-zone uses this to render a flat picker fallback when
+   * no color/size/fabric axes are populated, and to drive live price/stock.
+   */
+  variants: ProductVariantOption[];
   description: string;
   specification: { label: string; value: string }[];
   returnPolicy: string;
@@ -46,6 +68,8 @@ export const MOCK_PRODUCT_DETAIL: ProductDetailData = {
     "/images/products/sss-29.jpg",
   ],
   sizes: ["S", "M", "L", "XL"],
+  // Mock fixture only — real PDP fills this from adapt.ts.
+  variants: [],
   colors: [
     { label: "Ivory", swatch: "/images/products/sss-29.jpg" },
     { label: "Dusty Rose", swatch: "/images/products/sss-29.jpg" },

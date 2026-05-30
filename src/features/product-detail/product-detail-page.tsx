@@ -74,6 +74,11 @@ export function ProductDetailPage({
     product.colors.length > 0 ? 0 : null,
   );
   const [selectedFabric, setSelectedFabric] = useState<string | null>(null);
+  // Explicit pick from the flat variant fallback picker (shown when the
+  // product has variants but no color/size/fabric axes). When null, axis
+  // resolution drives the selection. Cleared whenever an axis changes so the
+  // axis pickers always win for axis-driven products.
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [stickyVisible, setStickyVisible] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -82,15 +87,32 @@ export function ProductDetailPage({
   const router = useRouter();
   const { addItem } = useCart();
 
-  const variant = resolveVariant(
-    variants,
-    product.colors,
-    selectedColor,
-    selectedFabric,
-    selectedSize,
-  );
+  // Variant resolution: explicit manual pick wins; otherwise axis-based.
+  // Falls through to the first variant when neither is set so add-to-cart
+  // always has a target.
+  const variant = (() => {
+    if (selectedVariantId && variants) {
+      const explicit = variants.find((v) => v.id === selectedVariantId);
+      if (explicit) return explicit;
+    }
+    return resolveVariant(variants, product.colors, selectedColor, selectedFabric, selectedSize);
+  })();
   const outOfStock = variant ? variant.inStock === false : false;
   const canBuy = Boolean(variant) && !outOfStock;
+
+  // Axis-change wrappers clear the manual pick so axis selection takes over.
+  function handleSizeChange(s: string) {
+    setSelectedVariantId(null);
+    setSelectedSize(s);
+  }
+  function handleColorChange(i: number) {
+    setSelectedVariantId(null);
+    setSelectedColor(i);
+  }
+  function handleFabricChange(f: string) {
+    setSelectedVariantId(null);
+    setSelectedFabric(f);
+  }
 
   async function handleAddToCart(buyNow: boolean) {
     if (!variant || outOfStock) {
@@ -150,9 +172,10 @@ export function ProductDetailPage({
         selectedSize={selectedSize}
         selectedColor={selectedColor}
         selectedFabric={selectedFabric}
-        onSizeChange={setSelectedSize}
-        onColorChange={setSelectedColor}
-        onFabricChange={setSelectedFabric}
+        currentVariantId={variant?.id ?? null}
+        onSizeChange={handleSizeChange}
+        onColorChange={handleColorChange}
+        onFabricChange={handleFabricChange}
         onAddToCart={() => handleAddToCart(false)}
         adding={adding}
         canBuy={canBuy}
@@ -177,10 +200,12 @@ export function ProductDetailPage({
                 selectedSize={selectedSize}
                 selectedColor={selectedColor}
                 selectedFabric={selectedFabric}
+                currentVariantId={variant?.id ?? null}
+                onVariantChange={setSelectedVariantId}
                 quantity={quantity}
-                onSizeChange={setSelectedSize}
-                onColorChange={setSelectedColor}
-                onFabricChange={setSelectedFabric}
+                onSizeChange={handleSizeChange}
+                onColorChange={handleColorChange}
+                onFabricChange={handleFabricChange}
                 onQuantityChange={setQuantity}
                 onAddToCart={() => handleAddToCart(false)}
                 onBuyNow={() => handleAddToCart(true)}

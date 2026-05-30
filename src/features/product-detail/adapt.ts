@@ -12,7 +12,7 @@
 import { siteConfig } from "@/config/site";
 import { PLACEHOLDER_IMAGE } from "@/lib/api/mappers";
 import type { Product } from "@/types/product";
-import type { ProductColor, ProductDetailData } from "./data";
+import type { ProductColor, ProductDetailData, ProductVariantOption } from "./data";
 
 function titleize(value: string): string {
   return value
@@ -71,6 +71,25 @@ export function toProductDetailData(product: Product): ProductDetailData {
   const fabrics = uniq(product.variants.map((v) => v.options.fabric));
   const sizes = uniq(product.variants.map((v) => v.options.size));
 
+  // Structured variant list — drives the fallback picker + live price/stock
+  // updates in BuyZone. Builds a human label from populated axes, falling
+  // back to the SKU when no axes are set (the dem-av1/dem-av2 case).
+  // `isDefault` is currently inferred from order: the first variant is the
+  // implicit default; backend-side `is_default` lands in a later phase.
+  const variants: ProductVariantOption[] = product.variants.map((v, i) => {
+    const axisLabel = [v.options.color, v.options.fabric, v.options.size]
+      .filter(Boolean)
+      .join(" · ");
+    return {
+      id: v.id,
+      sku: v.sku,
+      label: axisLabel || v.sku,
+      price: v.price || product.price,
+      available: v.inStock,
+      isDefault: i === 0,
+    };
+  });
+
   // Specification rows — only include those backed by real data.
   const specification: { label: string; value: string }[] = [];
   if (product.attributes.fabric)
@@ -114,6 +133,7 @@ export function toProductDetailData(product: Product): ProductDetailData {
     sizes,
     colors,
     fabrics,
+    variants,
     description: product.description,
     specification,
     returnPolicy: brand.returnPolicy,
