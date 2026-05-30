@@ -100,7 +100,11 @@ export function toProductDetailData(product: Product): ProductDetailData {
     // category href so the breadcrumb + "view all" point somewhere real.
     categorySlug: "/saris",
     name: product.title,
-    code: product.variants[0]?.sku ?? "",
+    // Real product code (admin-managed, persisted on `products.code`). Variant
+    // SKUs are NOT used here — they are operational identifiers, not the
+    // customer-facing product code. Empty when the admin hasn't set one; the
+    // PDP buy-zone hides the "Code:" row in that case.
+    code: product.code ?? "",
     price: product.price,
     mrp: product.compareAtPrice,
     // No review system yet — zero keeps the UI honest (rating block hidden).

@@ -45,6 +45,8 @@ export interface ProductSummary {
 }
 
 export interface Product extends ProductSummary {
+  /** Admin-managed product code shown on the PDP (≠ variant SKU). */
+  code?: string;
   description: string;
   story?: string;
   images: ProductImage[];

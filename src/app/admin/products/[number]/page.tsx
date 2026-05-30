@@ -46,6 +46,7 @@ function EditForm({ product, refetch }: { product: AdminProduct; refetch: () => 
   const qc = useQueryClient();
   const [f, setF] = useState({
     name: product.name,
+    code: product.code ?? "",
     basePrice: String(product.basePrice),
     mrp: product.mrp != null ? String(product.mrp) : "",
     shortDescription: product.shortDescription ?? "",
@@ -62,6 +63,7 @@ function EditForm({ product, refetch }: { product: AdminProduct; refetch: () => 
     mutationFn: () =>
       admin.updateProduct(authedFetch, product.id, {
         name: f.name,
+        code: f.code.trim() ? f.code.trim() : null,
         basePrice: Number(f.basePrice),
         mrp: f.mrp ? Number(f.mrp) : null,
         shortDescription: f.shortDescription,
@@ -108,6 +110,10 @@ function EditForm({ product, refetch }: { product: AdminProduct; refetch: () => 
             <h2 className="mb-4 font-body text-sm font-bold uppercase tracking-[0.14em] text-text-primary">Details</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Name" full><input className={input} value={f.name} onChange={set("name")} /></Field>
+              <Field label="Product code (optional)" full>
+                <input className={input} value={f.code} onChange={set("code")} placeholder="e.g. OOR-SAR-001" />
+                <p className="mt-1 font-body text-[11px] text-text-muted">Shown on the storefront product page. Distinct from variant SKUs.</p>
+              </Field>
               <Field label="Base price (₹)"><input className={input} inputMode="decimal" value={f.basePrice} onChange={set("basePrice")} /></Field>
               <Field label="MRP (₹, optional)"><input className={input} inputMode="decimal" value={f.mrp} onChange={set("mrp")} /></Field>
               <Field label="Short description" full><input className={input} value={f.shortDescription} onChange={set("shortDescription")} /></Field>

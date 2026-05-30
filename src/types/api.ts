@@ -81,6 +81,8 @@ export interface BackendProductRead {
   id: string;
   slug: string;
   name: string;
+  /** Admin-managed product code shown on the PDP (≠ variant SKU). */
+  code: string | null;
   description: string | null;
   short_description: string | null;
   base_price: string;

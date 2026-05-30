@@ -102,6 +102,7 @@ export function mapProduct(dto: BackendProductRead): Product {
     id: dto.id,
     slug: dto.slug,
     title: dto.name,
+    code: dto.code ?? undefined,
     price,
     compareAtPrice,
     currency: dto.currency,

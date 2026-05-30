@@ -137,6 +137,7 @@ function mapProduct(d: Dict): AdminProduct {
     id: s(d.id),
     slug: s(d.slug),
     name: s(d.name),
+    code: sn(d.code),
     shortDescription: sn(d.short_description),
     description: sn(d.description),
     basePrice: n(d.base_price as string),
@@ -181,7 +182,7 @@ export function getProduct(af: AuthedFetch, id: string): Promise<AdminProduct> {
 
 export function createProduct(
   af: AuthedFetch,
-  body: { name: string; basePrice: number; shortDescription?: string },
+  body: { name: string; basePrice: number; shortDescription?: string; code?: string },
 ): Promise<AdminProduct> {
   return af<Dict>("/admin/products", {
     method: "POST",
@@ -189,12 +190,14 @@ export function createProduct(
       name: body.name,
       base_price: body.basePrice,
       short_description: body.shortDescription || undefined,
+      code: body.code?.trim() || undefined,
     },
   }).then(mapProduct);
 }
 
 export interface ProductUpdateBody {
   name?: string;
+  code?: string | null;
   shortDescription?: string;
   description?: string;
   basePrice?: number;
@@ -212,6 +215,7 @@ export function updateProduct(af: AuthedFetch, id: string, body: ProductUpdateBo
     method: "PATCH",
     body: {
       name: body.name,
+      code: body.code,
       short_description: body.shortDescription,
       description: body.description,
       base_price: body.basePrice,

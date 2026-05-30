@@ -52,6 +52,8 @@ export interface AdminProduct {
   id: string;
   slug: string;
   name: string;
+  /** Admin-managed product code shown on the storefront PDP (≠ variant SKU). */
+  code: string | null;
   shortDescription: string | null;
   description: string | null;
   basePrice: number;

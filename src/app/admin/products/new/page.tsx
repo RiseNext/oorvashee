@@ -18,11 +18,12 @@ export default function NewProductPage() {
   const { authedFetch } = useApiClient();
   const router = useRouter();
   const [name, setName] = useState("");
+  const [code, setCode] = useState("");
   const [basePrice, setBasePrice] = useState("");
   const [shortDescription, setShortDescription] = useState("");
 
   const create = useMutation({
-    mutationFn: () => admin.createProduct(authedFetch, { name, basePrice: Number(basePrice), shortDescription }),
+    mutationFn: () => admin.createProduct(authedFetch, { name, basePrice: Number(basePrice), shortDescription, code }),
     onSuccess: (p) => {
       toast.success("Product created — add details, variants & images");
       router.push(`/admin/products/${p.id}`);
@@ -49,6 +50,11 @@ export default function NewProductPage() {
           <div className="flex flex-col gap-1.5">
             <label className="font-body text-xs font-medium uppercase tracking-[0.08em] text-text-secondary">Product name</label>
             <input className={input} value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Banarasi Katan Silk Saree" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="font-body text-xs font-medium uppercase tracking-[0.08em] text-text-secondary">Product code (optional)</label>
+            <input className={input} value={code} onChange={(e) => setCode(e.target.value)} placeholder="e.g. OOR-SAR-001" />
+            <p className="font-body text-[11px] text-text-muted">Shown on the storefront product page. Distinct from variant SKUs.</p>
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="font-body text-xs font-medium uppercase tracking-[0.08em] text-text-secondary">Base price (₹)</label>
