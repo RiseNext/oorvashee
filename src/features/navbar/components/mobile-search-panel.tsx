@@ -39,7 +39,7 @@ export function MobileSearchPanel({ onClose }: MobileSearchPanelProps) {
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop — fade only (no blur) for cheap compositing. */}
       <motion.button
         type="button"
         aria-label="Close search"
@@ -47,33 +47,24 @@ export function MobileSearchPanel({ onClose }: MobileSearchPanelProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.22, ease }}
-        className="fixed inset-0 -z-[1] cursor-default bg-text-primary/10 backdrop-blur-[2px] md:hidden"
+        transition={{ duration: 0.18, ease }}
+        className="fixed inset-0 -z-[1] cursor-default bg-text-primary/25 md:hidden"
       />
 
-      {/* Search panel */}
+      {/* Search panel — transform + opacity only (GPU-composited, smooth). */}
       <motion.div
         key="mobile-search-panel"
         id="mobile-search-panel"
         role="search"
         aria-label="Site search"
-        initial={{ height: 0, opacity: 0 }}
-        animate={{ height: "auto", opacity: 1 }}
-        exit={{ height: 0, opacity: 0 }}
-        transition={{
-          height: { duration: 0.32, ease },
-          opacity: { duration: 0.22, ease },
-        }}
-        className="absolute inset-x-0 top-full z-10 overflow-hidden px-3 md:hidden"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.22, ease }}
+        style={{ willChange: "transform, opacity" }}
+        className="absolute inset-x-0 top-full z-10 px-3 md:hidden"
       >
-        <motion.div
-          initial={{ y: -6, scale: 0.985 }}
-          animate={{ y: 0, scale: 1 }}
-          exit={{ y: -6, scale: 0.985 }}
-          transition={{ duration: 0.28, ease }}
-          style={{ transformOrigin: "top center" }}
-          className="mx-auto mt-2 max-w-7xl rounded-[24px] border border-border-default/40 bg-bg-card/92 shadow-[0_24px_60px_-16px_rgba(122,75,21,0.28),0_4px_16px_-4px_rgba(122,75,21,0.12)] backdrop-blur-xl supports-[backdrop-filter]:bg-bg-card/85"
-        >
+        <div className="mx-auto mt-2 max-w-7xl rounded-[24px] border border-border-default/40 bg-bg-card shadow-[0_24px_60px_-16px_rgba(122,75,21,0.28),0_4px_16px_-4px_rgba(122,75,21,0.12)]">
           <form role="search" onSubmit={submitSearch} className="flex items-center gap-3 px-4 py-3.5">
             <button type="submit" aria-label="Search" className="shrink-0 outline-none">
               <Search className="h-[18px] w-[18px] text-text-muted" strokeWidth={1.7} />
@@ -97,7 +88,7 @@ export function MobileSearchPanel({ onClose }: MobileSearchPanelProps) {
               <X className="h-4 w-4" strokeWidth={1.7} />
             </button>
           </form>
-        </motion.div>
+        </div>
       </motion.div>
     </>
   );

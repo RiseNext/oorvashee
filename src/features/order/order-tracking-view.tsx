@@ -21,11 +21,11 @@ export function OrderTrackingView({ orderNumber }: { orderNumber: string }) {
     <>
       <Navbar />
       <main className="flex-1 bg-bg-primary">
-        <div className="bg-bg-secondary py-10 text-center px-4 sm:py-12">
-          <OrnamentalDivider align="center" className="mx-auto max-w-[160px] mb-4" />
+        <div className="bg-bg-secondary py-6 text-center px-4 sm:py-8">
+          <OrnamentalDivider align="center" className="mx-auto max-w-[130px] mb-2.5" />
           <h1
             className="font-display font-semibold uppercase"
-            style={{ color: "var(--gold)", fontSize: "clamp(1.8rem,4.5vw,3rem)", letterSpacing: "0.12em" }}
+            style={{ color: "var(--gold)", fontSize: "clamp(1.5rem,3.5vw,2.25rem)", letterSpacing: "0.12em" }}
           >
             Track Order
           </h1>

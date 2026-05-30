@@ -7,6 +7,7 @@ import { Navbar } from "@/features/navbar";
 import { ImageGallery } from "./image-gallery";
 import { BuyZone } from "./buy-zone";
 import { AccordionSections } from "./accordion-sections";
+import { PolicyAccordion } from "@/components/shared/policy-accordion";
 import { StickyHeader } from "./sticky-header";
 import { ProductsSection } from "./products-section";
 import { BrandStory } from "./brand-story";
@@ -188,6 +189,7 @@ export function ProductDetailPage({
                 outOfStock={outOfStock}
               />
               <AccordionSections product={product} />
+              <PolicyAccordion className="mt-6" />
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { MessageCircle, Mail, Phone, Truck, RotateCcw, ShieldCheck, PackageSearch } from "lucide-react";
 
 import { Navbar } from "@/features/navbar";
-import { OrnamentalDivider } from "@/components/shared/ornamental-divider";
+import { PageHeader } from "@/components/shared/page-header";
 import { siteConfig } from "@/config/site";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -28,18 +28,10 @@ export function SupportView() {
     <>
       <Navbar />
       <main className="flex-1 bg-bg-primary">
-        <div className="bg-bg-secondary py-10 text-center px-4 sm:py-14">
-          <OrnamentalDivider align="center" className="mx-auto max-w-[180px] mb-5" />
-          <h1
-            className="font-display font-semibold uppercase"
-            style={{ color: "var(--gold)", fontSize: "clamp(2rem,5vw,3.5rem)", letterSpacing: "0.12em" }}
-          >
-            Help &amp; Support
-          </h1>
-          <p className="mt-3 font-display italic text-sm sm:text-base text-text-muted">
-            We&apos;re here to help — every step of the way
-          </p>
-        </div>
+        <PageHeader
+          title="Help & Support"
+          subtitle="We're here to help — every step of the way"
+        />
 
         <div className="mx-auto max-w-screen-lg px-4 sm:px-6 lg:px-8 py-12 space-y-12">
           {/* Contact channels */}

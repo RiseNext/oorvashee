@@ -4,7 +4,7 @@ import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Navbar } from "@/features/navbar";
-import { OrnamentalDivider } from "@/components/shared/ornamental-divider";
+import { PageHeader } from "@/components/shared/page-header";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/components/shared/product-card";
 import { NewArrivalCard } from "./new-arrival-card";
@@ -88,31 +88,11 @@ export function NewArrivalsListingPage({ products }: NewArrivalsListingPageProps
       <Navbar />
       <main className="flex-1 bg-bg-primary">
         {/* ── Grand heading ── */}
-        <div className="bg-bg-secondary py-10 sm:py-14 lg:py-16 text-center px-4">
-          {/* "Just In" eyebrow label */}
-          <p
-            className="mb-4 font-body text-[10px] font-semibold uppercase tracking-[0.35em]"
-            style={{ color: "var(--gold)" }}
-          >
-            Just In
-          </p>
-          <OrnamentalDivider align="center" className="mx-auto max-w-[180px] mb-5" />
-          <h1
-            className="font-display font-semibold uppercase"
-            style={{
-              color: "var(--gold)",
-              fontSize: "clamp(2.25rem, 6vw, 5rem)",
-              letterSpacing: "0.14em",
-              lineHeight: 1.1,
-            }}
-          >
-            New Arrivals
-          </h1>
-          <p className="mt-3 font-display italic text-sm sm:text-base text-text-muted">
-            Fresh weaves, straight from the loom
-          </p>
-          <OrnamentalDivider align="center" className="mx-auto max-w-[180px] mt-5" />
-        </div>
+        <PageHeader
+          eyebrow="Just In"
+          title="New Arrivals"
+          subtitle="Fresh weaves, straight from the loom"
+        />
 
         {/* ── Products area ── */}
         <div

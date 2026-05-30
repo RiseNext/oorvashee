@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Navbar } from "@/features/navbar";
 import { ProductCard, type Product } from "@/components/shared/product-card";
-import { OrnamentalDivider } from "@/components/shared/ornamental-divider";
+import { PageHeader } from "@/components/shared/page-header";
 import { cn } from "@/lib/utils";
 
 const SORT_OPTIONS = [
@@ -102,26 +102,7 @@ export function SareeListingPage({
       <Navbar />
       <main className="flex-1 bg-bg-primary">
         {/* ── Grand heading ── */}
-        <div className="bg-bg-secondary py-10 sm:py-14 lg:py-16 text-center px-4">
-          <OrnamentalDivider align="center" className="mx-auto max-w-[180px] mb-5" />
-          <h1
-            className="font-display font-semibold uppercase"
-            style={{
-              color: "var(--gold)",
-              fontSize: "clamp(2.25rem, 6vw, 5rem)",
-              letterSpacing: "0.14em",
-              lineHeight: 1.1,
-            }}
-          >
-            {title}
-          </h1>
-          {subtitle && (
-            <p className="mt-3 font-display italic text-sm sm:text-base text-text-muted">
-              {subtitle}
-            </p>
-          )}
-          <OrnamentalDivider align="center" className="mx-auto max-w-[180px] mt-5" />
-        </div>
+        <PageHeader title={title} subtitle={subtitle} />
 
         {/* ── Products area ── */}
         <div

@@ -9,7 +9,8 @@ import { z } from "zod";
 import { AlertCircle, Lock, ShoppingBag } from "lucide-react";
 
 import { Navbar } from "@/features/navbar";
-import { OrnamentalDivider } from "@/components/shared/ornamental-divider";
+import { PageHeader } from "@/components/shared/page-header";
+import { PolicyAccordion } from "@/components/shared/policy-accordion";
 import { useCart } from "@/hooks/use-cart";
 import { useCheckout } from "@/hooks/use-checkout";
 import { useAddressStore } from "@/store/address-store";
@@ -45,15 +46,7 @@ export function CheckoutView() {
     <>
       <Navbar />
       <main className="flex-1 bg-bg-primary">
-        <div className="bg-bg-secondary py-10 text-center px-4 sm:py-12">
-          <OrnamentalDivider align="center" className="mx-auto max-w-[160px] mb-4" />
-          <h1
-            className="font-display font-semibold uppercase"
-            style={{ color: "var(--gold)", fontSize: "clamp(1.8rem,4.5vw,3rem)", letterSpacing: "0.12em" }}
-          >
-            Checkout
-          </h1>
-        </div>
+        <PageHeader title="Checkout" />
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
           {cart.items.length === 0 ? <EmptyCheckout /> : <CheckoutBody />}
         </div>
@@ -338,6 +331,9 @@ function CheckoutBody() {
             Secure checkout. Your details are encrypted.
           </p>
         </div>
+
+        {/* Policies & Information — directly under the order summary */}
+        <PolicyAccordion className="mt-6" />
       </aside>
     </form>
   );

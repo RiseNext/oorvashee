@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Play } from "lucide-react";
 import { Navbar } from "@/features/navbar";
-import { OrnamentalDivider } from "@/components/shared/ornamental-divider";
+import { PageHeader } from "@/components/shared/page-header";
 import { siteConfig, videoGallery } from "@/config/site";
 
 export const metadata: Metadata = {
@@ -18,24 +18,10 @@ export default function VideoPage() {
       <Navbar />
       <main className="flex-1 bg-bg-primary">
         {/* ── Page header ── */}
-        <div className="bg-bg-secondary py-10 sm:py-14 lg:py-16 text-center px-4">
-          <OrnamentalDivider align="center" className="mx-auto max-w-[180px] mb-5" />
-          <h1
-            className="font-display font-semibold uppercase"
-            style={{
-              color: "var(--gold)",
-              fontSize: "clamp(2.25rem, 6vw, 5rem)",
-              letterSpacing: "0.14em",
-              lineHeight: 1.1,
-            }}
-          >
-            Video
-          </h1>
-          <p className="mt-3 font-display italic text-sm sm:text-base text-text-muted">
-            Draping guides, weave stories, and collection films
-          </p>
-          <OrnamentalDivider align="center" className="mx-auto max-w-[180px] mt-5" />
-        </div>
+        <PageHeader
+          title="Video"
+          subtitle="Draping guides, weave stories, and collection films"
+        />
 
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
           {hasVideos && (

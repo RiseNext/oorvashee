@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { Navbar } from "@/features/navbar";
-import { OrnamentalDivider } from "@/components/shared/ornamental-divider";
+import { PageHeader } from "@/components/shared/page-header";
 import { siteConfig } from "@/config/site";
+import { CONTACT_INTRO } from "@/config/policies";
 
 export const metadata = { title: "Contact Us" };
 
@@ -12,27 +13,20 @@ export default function ContactPage() {
       <Navbar />
       <main className="flex-1 bg-bg-primary">
         {/* ── Page header ── */}
-        <div className="bg-bg-secondary py-10 sm:py-14 lg:py-16 text-center px-4">
-          <OrnamentalDivider align="center" className="mx-auto max-w-[180px] mb-5" />
-          <h1
-            className="font-display font-semibold uppercase"
-            style={{
-              color: "var(--gold)",
-              fontSize: "clamp(2.25rem, 6vw, 5rem)",
-              letterSpacing: "0.14em",
-              lineHeight: 1.1,
-            }}
-          >
-            Contact Us
-          </h1>
-          <p className="mt-3 font-display italic text-sm sm:text-base text-text-muted">
-            We&apos;d love to hear from you — visit us in store or reach out anytime
-          </p>
-          <OrnamentalDivider align="center" className="mx-auto max-w-[180px] mt-5" />
-        </div>
+        <PageHeader
+          title="Contact Us"
+          subtitle="We'd love to hear from you — visit us in store or reach out anytime"
+        />
 
         {/* ── Contact cards ── */}
         <div className="mx-auto max-w-screen-lg px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+          {/* Intro copy */}
+          <div className="mx-auto mb-12 max-w-3xl space-y-4 text-center font-body text-[15px] leading-relaxed text-text-secondary sm:text-base">
+            {CONTACT_INTRO.paragraphs.map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
+          </div>
+
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {/* Store Location */}
             <div className="group rounded-2xl border border-border-default/50 bg-bg-card p-7 shadow-sm transition-shadow duration-300 hover:shadow-md sm:col-span-2 lg:col-span-1">
@@ -49,14 +43,16 @@ export default function ContactPage() {
                 VR Location
               </p>
               <address className="not-italic text-[15px] leading-relaxed text-text-secondary">
-                Shop No. 44 &amp; 45, Ground Floor,
+                H No: 6-3-2100/594, Plot No: S4/C-594,
                 <br />
-                LPT Market, LB Nagar,
+                Venkatakala Nilayam, NGO&rsquo;s Colony,
                 <br />
-                Hyderabad, Telangana — 500074
+                Vanastalipuram, Rangareddy Dist,
+                <br />
+                Telangana — 500070
               </address>
               <Link
-                href="https://maps.google.com/?q=LPT+Market+LB+Nagar+Hyderabad"
+                href="https://maps.google.com/?q=Venkatakala+Nilayam+NGOs+Colony+Vanastalipuram+Rangareddy+Telangana+500070"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-medium transition-colors duration-200 hover:underline"
@@ -133,10 +129,10 @@ export default function ContactPage() {
               </div>
               <div>
                 <h2 className="font-display text-base font-semibold tracking-wide text-text-primary">
-                  Store Hours
+                  Support Hours
                 </h2>
-                <p className="mt-1 text-[14px] text-text-muted italic">
-                  Hours and more details coming soon — call us to confirm timings.
+                <p className="mt-1 text-[14px] text-text-secondary">
+                  {siteConfig.contact.supportHours}
                 </p>
               </div>
             </div>

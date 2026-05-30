@@ -23,7 +23,8 @@ export const siteConfig = {
     email: "hello@oorvashee.com",
     phone: "+91 97037 66779",
     whatsapp: "+91 97037 66779",
-    address: "Shop No. 44 & 45, Ground Floor, LPT Market, LB Nagar, Hyderabad, Telangana — 500074",
+    address: "H No: 6-3-2100/594, Plot No: S4/C-594, Venkatakala Nilayam, NGO's Colony, Vanastalipuram, Rangareddy Dist, Telangana — 500070",
+    supportHours: "Monday to Saturday, 10:00 AM to 7:00 PM IST",
   },
   social: {
     instagram: "https://instagram.com/oorvashee",

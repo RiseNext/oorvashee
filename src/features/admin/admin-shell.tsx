@@ -10,6 +10,7 @@ import {
   Boxes,
   FolderTree,
   Users,
+  FileText,
   Store,
   LogOut,
 } from "lucide-react";
@@ -25,6 +26,7 @@ const NAV = [
   { href: "/admin/inventory", label: "Inventory", icon: Boxes, exact: false },
   { href: "/admin/categories", label: "Categories", icon: FolderTree, exact: false },
   { href: "/admin/customers", label: "Customers", icon: Users, exact: false },
+  { href: "/admin/policies", label: "Policies", icon: FileText, exact: false },
 ] as const;
 
 function active(pathname: string, href: string, exact: boolean) {

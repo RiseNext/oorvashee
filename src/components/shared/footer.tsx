@@ -70,6 +70,14 @@ const SUPPORT_LINKS = [
   { label: "Wishlist", href: "/wishlist" },
 ];
 
+const POLICY_LINKS = [
+  { label: "Policies & Information", href: "/policies" },
+  { label: "Privacy Policy", href: "/policies/privacy" },
+  { label: "Shipping Policy", href: "/policies/shipping" },
+  { label: "Refund Policy", href: "/policies/refund" },
+  { label: "Terms & Conditions", href: "/policies/terms" },
+];
+
 const waNumber = siteConfig.contact.whatsapp.replace(/\D/g, "");
 
 const SOCIALS = [
@@ -196,11 +204,27 @@ export function Footer() {
 
       {/* Bottom bar */}
       <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-screen-xl flex-col items-center justify-between gap-2 px-5 py-5 sm:flex-row sm:px-6 lg:px-8">
-          <p className="font-body text-xs text-white/55">
-            © {new Date().getFullYear()} {siteConfig.fullName}. All rights reserved.
-          </p>
-          <p className="font-display text-xs italic text-white/45">{siteConfig.storyTagline}</p>
+        <div className="mx-auto max-w-screen-xl px-5 py-5 sm:px-6 lg:px-8">
+          <nav
+            aria-label="Policies"
+            className="mb-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2"
+          >
+            {POLICY_LINKS.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="font-body text-xs text-white/60 transition-colors duration-200 hover:text-white"
+              >
+                {l.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
+            <p className="font-body text-xs text-white/55">
+              © {new Date().getFullYear()} {siteConfig.fullName}. All rights reserved.
+            </p>
+            <p className="font-display text-xs italic text-white/45">{siteConfig.storyTagline}</p>
+          </div>
         </div>
       </div>
     </footer>

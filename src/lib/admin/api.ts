@@ -629,6 +629,62 @@ export function setCategoryActive(af: AuthedFetch, id: string, active: boolean):
   }).then(() => undefined);
 }
 
+// ============================ Policies ============================
+
+export interface AdminPolicy {
+  id: string;
+  /** Immutable storefront key (privacy | shipping | refund | terms). */
+  key: string;
+  title: string;
+  summary: string | null;
+  /** Full text; paragraphs separated by blank lines. */
+  body: string;
+  displayOrder: number;
+  isActive: boolean;
+  updatedAt: string;
+}
+
+function mapPolicy(d: Dict): AdminPolicy {
+  return {
+    id: s(d.id),
+    key: s(d.key),
+    title: s(d.title),
+    summary: sn(d.summary),
+    body: s(d.body),
+    displayOrder: Number(d.display_order ?? 0),
+    isActive: Boolean(d.is_active),
+    updatedAt: s(d.updated_at),
+  };
+}
+
+/** All store policies (active + hidden), in display order. */
+export function listPolicies(af: AuthedFetch): Promise<AdminPolicy[]> {
+  return af<Dict[]>("/admin/policies").then((rows) => (rows ?? []).map(mapPolicy));
+}
+
+export interface PolicyUpdateBody {
+  title?: string;
+  summary?: string;
+  body?: string;
+  displayOrder?: number;
+  isActive?: boolean;
+}
+
+/** Edit a policy. `key` is immutable, so it is never sent. */
+export function updatePolicy(
+  af: AuthedFetch,
+  id: string,
+  patch: PolicyUpdateBody,
+): Promise<AdminPolicy> {
+  const body: Record<string, unknown> = {};
+  if (patch.title !== undefined) body.title = patch.title;
+  if (patch.summary !== undefined) body.summary = patch.summary;
+  if (patch.body !== undefined) body.body = patch.body;
+  if (patch.displayOrder !== undefined) body.display_order = patch.displayOrder;
+  if (patch.isActive !== undefined) body.is_active = patch.isActive;
+  return af<Dict>(`/admin/policies/${id}`, { method: "PATCH", body }).then(mapPolicy);
+}
+
 // ============================ Customers ============================
 
 function mapCustomerItem(d: Dict): AdminCustomerItem {

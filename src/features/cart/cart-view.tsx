@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { Minus, Plus, Trash2, ArrowRight, ShoppingBag, AlertCircle } from "lucide-react";
 
 import { Navbar } from "@/features/navbar";
-import { OrnamentalDivider } from "@/components/shared/ornamental-divider";
+import { PageHeader } from "@/components/shared/page-header";
+import { PolicyAccordion } from "@/components/shared/policy-accordion";
 import { useCart } from "@/hooks/use-cart";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -22,20 +23,14 @@ export function CartView() {
     <>
       <Navbar />
       <main className="flex-1 bg-bg-primary">
-        <div className="bg-bg-secondary py-10 text-center px-4 sm:py-14">
-          <OrnamentalDivider align="center" className="mx-auto max-w-[180px] mb-5" />
-          <h1
-            className="font-display font-semibold uppercase"
-            style={{ color: "var(--gold)", fontSize: "clamp(2rem,5vw,3.5rem)", letterSpacing: "0.12em" }}
-          >
-            Shopping Bag
-          </h1>
-          {cart.itemCount > 0 && (
-            <p className="mt-3 font-display italic text-sm sm:text-base text-text-muted">
-              {cart.itemCount} {cart.itemCount === 1 ? "piece" : "pieces"} in your bag
-            </p>
-          )}
-        </div>
+        <PageHeader
+          title="Shopping Bag"
+          subtitle={
+            cart.itemCount > 0
+              ? `${cart.itemCount} ${cart.itemCount === 1 ? "piece" : "pieces"} in your bag`
+              : undefined
+          }
+        />
 
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
           {isLoading ? (
@@ -138,6 +133,9 @@ function CartBody() {
             Continue shopping
           </Link>
         </div>
+
+        {/* Policies & Information — directly under the order summary */}
+        <PolicyAccordion className="mt-6" />
       </aside>
     </div>
   );

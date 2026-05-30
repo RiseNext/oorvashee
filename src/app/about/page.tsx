@@ -1,15 +1,15 @@
-import { Navbar } from "@/features/navbar";
-import { ComingSoon } from "@/components/shared/coming-soon";
+import type { Metadata } from "next";
+import { PolicyPage } from "@/components/shared/policy-page";
+import { ABOUT_US } from "@/config/policies";
 
-export const metadata = { title: "About Us" };
+export const metadata: Metadata = {
+  title: ABOUT_US.title,
+  description: ABOUT_US.tagline,
+  alternates: { canonical: "/about" },
+};
 
 export default function AboutPage() {
   return (
-    <>
-      <Navbar />
-      <main className="flex-1">
-        <ComingSoon title="About Us" />
-      </main>
-    </>
+    <PolicyPage title={ABOUT_US.title} intro={ABOUT_US.tagline} paragraphs={ABOUT_US.paragraphs} />
   );
 }

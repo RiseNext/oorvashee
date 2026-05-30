@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Heart } from "lucide-react";
 
 import { Navbar } from "@/features/navbar";
-import { OrnamentalDivider } from "@/components/shared/ornamental-divider";
+import { PageHeader } from "@/components/shared/page-header";
 import { ProductCard, type Product as CardProduct } from "@/components/shared/product-card";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { useAuthSession } from "@/lib/auth/use-auth-session";
@@ -39,20 +39,14 @@ export function WishlistView() {
     <>
       <Navbar />
       <main className="flex-1 bg-bg-primary">
-        <div className="bg-bg-secondary py-10 text-center px-4 sm:py-14">
-          <OrnamentalDivider align="center" className="mx-auto max-w-[180px] mb-5" />
-          <h1
-            className="font-display font-semibold uppercase"
-            style={{ color: "var(--gold)", fontSize: "clamp(2rem,5vw,3.5rem)", letterSpacing: "0.12em" }}
-          >
-            Wishlist
-          </h1>
-          {authed && wishlist.count > 0 && (
-            <p className="mt-3 font-display italic text-sm sm:text-base text-text-muted">
-              {wishlist.count} saved {wishlist.count === 1 ? "piece" : "pieces"}
-            </p>
-          )}
-        </div>
+        <PageHeader
+          title="Wishlist"
+          subtitle={
+            authed && wishlist.count > 0
+              ? `${wishlist.count} saved ${wishlist.count === 1 ? "piece" : "pieces"}`
+              : undefined
+          }
+        />
 
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
           {!isLoaded ? (
