@@ -7,8 +7,15 @@ import { toast } from "sonner";
 
 import { useApiClient } from "@/hooks/use-api-client";
 import * as admin from "@/lib/admin/api";
+import { compressImage } from "@/lib/media/compress-image";
 import { cn } from "@/lib/utils";
 import type { AdminImage } from "@/types/admin";
+
+function fmtSize(bytes: number): string {
+  return bytes >= 1024 * 1024
+    ? `${(bytes / 1024 / 1024).toFixed(1)} MB`
+    : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
 
 /**
  * Cloudinary signed-upload manager. Per file: sign → upload to Cloudinary →
@@ -34,14 +41,36 @@ export function ProductMedia({
     setUploading(true);
     try {
       let primaryCount = images.length;
-      for (const file of Array.from(files)) {
+      let totalOriginal = 0;
+      let totalOutput = 0;
+      for (const original of Array.from(files)) {
+        // Resize + compress in the browser before the signed upload. The
+        // smaller file flows through the UNCHANGED sign → upload → attach path
+        // (the signature does not cover file bytes, so it stays valid).
+        const { file, originalBytes, outputBytes, skipped } = await compressImage(original);
+        totalOriginal += originalBytes;
+        totalOutput += outputBytes;
+        if (!skipped) {
+          const pct = Math.round((1 - outputBytes / originalBytes) * 100);
+          console.info(
+            `[image] ${original.name}: ${fmtSize(originalBytes)} → ${fmtSize(outputBytes)} (${pct}% smaller)`,
+          );
+        }
+
         const sig = await admin.signUpload(authedFetch, productId);
         const result = await admin.uploadToCloudinary(sig, file);
         await admin.attachProductImage(authedFetch, productId, result, { isPrimary: primaryCount === 0 });
         primaryCount += 1;
       }
       onChanged();
-      toast.success(files.length > 1 ? "Images uploaded" : "Image uploaded");
+      const savedPct =
+        totalOriginal > 0 ? Math.round((1 - totalOutput / totalOriginal) * 100) : 0;
+      toast.success(
+        files.length > 1 ? "Images uploaded" : "Image uploaded",
+        savedPct > 0
+          ? { description: `Optimized ${fmtSize(totalOriginal)} → ${fmtSize(totalOutput)} (${savedPct}% smaller)` }
+          : undefined,
+      );
     } catch {
       toast.error("Upload failed. Please try again.");
     } finally {
