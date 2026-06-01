@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Heart, Search, User } from "lucide-react";
 import { CartButton } from "./cart-button";
+import { useAuthActions } from "@/features/auth/use-auth-actions";
 import { cn } from "@/lib/utils";
 
 interface NavbarActionsProps {
@@ -21,6 +22,8 @@ export function NavbarActions({
   compact,
   onNavigate,
 }: NavbarActionsProps) {
+  const { requireAuth } = useAuthActions();
+
   return (
     <div
       className={cn(
@@ -38,14 +41,18 @@ export function NavbarActions({
         <Search className="h-[18px] w-[18px]" strokeWidth={1.6} />
       </button>
 
-      <Link
-        href="/account"
+      <button
+        type="button"
         aria-label="Account"
-        onClick={onNavigate}
+        onClick={() => {
+          onNavigate?.();
+          // Signed in → /account; guest → custom auth modal, then /account.
+          requireAuth("/account");
+        }}
         className={iconButton}
       >
         <User className="h-[18px] w-[18px]" strokeWidth={1.6} />
-      </Link>
+      </button>
 
       <Link
         href="/wishlist"

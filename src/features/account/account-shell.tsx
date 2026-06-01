@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -14,7 +14,8 @@ import {
 
 import { Navbar } from "@/features/navbar";
 import { useAuthSession } from "@/lib/auth/use-auth-session";
-import { CLERK_ENABLED, SIGN_IN_URL } from "@/lib/auth/config";
+import { CLERK_ENABLED } from "@/lib/auth/config";
+import { useAuthModalStore } from "@/features/auth/auth-modal-store";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -34,7 +35,16 @@ export function AccountShell({ title, children }: { title: string; children: Rea
   const authed = CLERK_ENABLED && isSignedIn;
   const pathname = usePathname();
   const router = useRouter();
+  const openAuth = useAuthModalStore((s) => s.openAuth);
   const [signingOut, setSigningOut] = useState(false);
+
+  // Guest landing on /account directly → open the custom auth modal (return
+  // here after sign-in). The profile icon already routes guests through the
+  // modal, so this only covers deep links / post-sign-out.
+  const needsAuth = CLERK_ENABLED && isLoaded && !isSignedIn;
+  useEffect(() => {
+    if (needsAuth) openAuth("/account");
+  }, [needsAuth, openAuth]);
 
   async function handleSignOut() {
     setSigningOut(true);
@@ -60,16 +70,30 @@ export function AccountShell({ title, children }: { title: string; children: Rea
               <p className="font-display italic text-lg text-text-muted sm:text-xl">
                 Sign in to view your account
               </p>
-              <Link
-                href={CLERK_ENABLED ? SIGN_IN_URL : "/saris"}
-                className={cn(
-                  "mt-6 inline-flex items-center gap-2 rounded-md border-[1.5px] border-cta-fill px-6 py-3",
-                  "font-body text-[11px] font-medium uppercase tracking-[0.2em] text-cta-fill transition-colors duration-300",
-                  "hover:bg-cta-fill hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cta-fill/30",
-                )}
-              >
-                {CLERK_ENABLED ? "Sign in" : "Browse the collection"}
-              </Link>
+              {CLERK_ENABLED ? (
+                <button
+                  type="button"
+                  onClick={() => openAuth("/account")}
+                  className={cn(
+                    "mt-6 inline-flex items-center gap-2 rounded-md border-[1.5px] border-cta-fill px-6 py-3",
+                    "font-body text-[11px] font-medium uppercase tracking-[0.2em] text-cta-fill transition-colors duration-300",
+                    "hover:bg-cta-fill hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cta-fill/30",
+                  )}
+                >
+                  Sign in
+                </button>
+              ) : (
+                <Link
+                  href="/saris"
+                  className={cn(
+                    "mt-6 inline-flex items-center gap-2 rounded-md border-[1.5px] border-cta-fill px-6 py-3",
+                    "font-body text-[11px] font-medium uppercase tracking-[0.2em] text-cta-fill transition-colors duration-300",
+                    "hover:bg-cta-fill hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cta-fill/30",
+                  )}
+                >
+                  Browse the collection
+                </Link>
+              )}
             </div>
           </Centered>
         ) : (

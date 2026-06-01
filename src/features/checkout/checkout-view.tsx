@@ -15,6 +15,8 @@ import { useCart } from "@/hooks/use-cart";
 import { useCheckout } from "@/hooks/use-checkout";
 import { useAddressStore } from "@/store/address-store";
 import { useAuthSession } from "@/lib/auth/use-auth-session";
+import { CLERK_ENABLED } from "@/lib/auth/config";
+import { useAuthModalStore } from "@/features/auth/auth-modal-store";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +43,18 @@ const inputClass = cn(
 
 export function CheckoutView() {
   const { cart } = useCart();
+  const { isLoaded, isSignedIn } = useAuthSession();
+  const openAuth = useAuthModalStore((s) => s.openAuth);
+
+  const authPending = CLERK_ENABLED && !isLoaded;
+  const needsAuth = CLERK_ENABLED && isLoaded && !isSignedIn;
+
+  // A guest reaching /checkout directly (deep link / "Buy Now") still must sign
+  // in. Pop the auth modal and keep them here so they continue after verifying
+  // — the cart is preserved and merged server-side by CartSync.
+  useEffect(() => {
+    if (needsAuth) openAuth("/checkout");
+  }, [needsAuth, openAuth]);
 
   return (
     <>
@@ -48,7 +62,15 @@ export function CheckoutView() {
       <main className="flex-1 bg-bg-primary">
         <PageHeader title="Checkout" />
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
-          {cart.items.length === 0 ? <EmptyCheckout /> : <CheckoutBody />}
+          {authPending ? (
+            <CheckoutLoading />
+          ) : needsAuth ? (
+            <CheckoutAuthGate onSignIn={() => openAuth("/checkout")} />
+          ) : cart.items.length === 0 ? (
+            <EmptyCheckout />
+          ) : (
+            <CheckoutBody />
+          )}
         </div>
       </main>
     </>
@@ -414,6 +436,41 @@ function SummaryRow({ label, value, loading }: { label: string; value: string; l
       ) : (
         <span className="text-text-primary">{value}</span>
       )}
+    </div>
+  );
+}
+
+function CheckoutLoading() {
+  return (
+    <div className="flex items-center justify-center py-24">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-cta-fill/30 border-t-cta-fill" />
+    </div>
+  );
+}
+
+function CheckoutAuthGate({ onSignIn }: { onSignIn: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center sm:py-24">
+      <span className="mb-5 inline-flex h-16 w-16 items-center justify-center rounded-full bg-bg-secondary text-cta-fill">
+        <Lock className="h-7 w-7" strokeWidth={1.5} />
+      </span>
+      <p className="font-display italic text-lg text-text-muted sm:text-xl">
+        Sign in to continue to checkout
+      </p>
+      <p className="mt-2 max-w-md font-body text-sm text-text-secondary">
+        Your bag is saved. Sign in or create an account to place your order.
+      </p>
+      <button
+        type="button"
+        onClick={onSignIn}
+        className={cn(
+          "mt-7 inline-flex items-center gap-2 rounded-md border-[1.5px] border-cta-fill px-6 py-3",
+          "font-body text-[11px] font-medium uppercase tracking-[0.2em] text-cta-fill transition-colors duration-300",
+          "hover:bg-cta-fill hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cta-fill/30",
+        )}
+      >
+        Sign in to continue
+      </button>
     </div>
   );
 }

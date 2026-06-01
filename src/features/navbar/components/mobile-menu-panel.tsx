@@ -7,6 +7,7 @@ import { motion, type Transition } from "motion/react";
 import { ChevronDown, ChevronRight, Heart, User } from "lucide-react";
 import { siteConfig, type NavItem } from "@/config/site";
 import { OrnamentalDivider } from "@/components/shared/ornamental-divider";
+import { useAuthActions } from "@/features/auth/use-auth-actions";
 import { cn } from "@/lib/utils";
 
 interface MobileMenuPanelProps {
@@ -25,6 +26,8 @@ const ease: Transition["ease"] = [0.22, 1, 0.36, 1];
  * measuring.
  */
 export function MobileMenuPanel({ onClose }: MobileMenuPanelProps) {
+  const { requireAuth } = useAuthActions();
+
   // Lock background scroll while the panel is open.
   useEffect(() => {
     const original = document.body.style.overflow;
@@ -91,14 +94,17 @@ export function MobileMenuPanel({ onClose }: MobileMenuPanelProps) {
               <OrnamentalDivider align="center" className="w-24" />
             </div>
             <div className="flex items-center justify-center gap-2">
-              <Link
-                href="/account"
-                onClick={onClose}
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  requireAuth("/account");
+                }}
                 className="inline-flex items-center gap-2 rounded-full border border-border-default/60 bg-bg-secondary/60 px-4 py-2 text-[12.5px] font-medium tracking-wide text-text-primary transition-colors duration-300 hover:border-gold/40 hover:bg-bg-secondary hover:text-gold"
               >
                 <User className="h-4 w-4" strokeWidth={1.6} />
                 Account
-              </Link>
+              </button>
               <Link
                 href="/wishlist"
                 onClick={onClose}

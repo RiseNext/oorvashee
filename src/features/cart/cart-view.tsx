@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Minus, Plus, Trash2, ArrowRight, ShoppingBag, AlertCircle } from "lucide-react";
 
 import { Navbar } from "@/features/navbar";
 import { PageHeader } from "@/components/shared/page-header";
 import { PolicyAccordion } from "@/components/shared/policy-accordion";
+import { useAuthActions } from "@/features/auth/use-auth-actions";
 import { useCart } from "@/hooks/use-cart";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -48,7 +48,10 @@ export function CartView() {
 
 function CartBody() {
   const { cart, updateQuantity, removeItem, clear, isMutating } = useCart();
-  const router = useRouter();
+  // Guests can fill their bag freely; auth is required only at checkout. For a
+  // signed-in user this goes straight to /checkout; a guest gets the auth modal
+  // first and returns to /checkout with their cart intact (merged by CartSync).
+  const { requireAuth } = useAuthActions();
 
   const canCheckout = cart.items.length > 0 && !cart.hasUnavailableItems;
   const remainingForFreeShip = Math.max(0, FREE_SHIP_THRESHOLD - cart.subtotal);
@@ -114,7 +117,7 @@ function CartBody() {
           <button
             type="button"
             disabled={!canCheckout || isMutating}
-            onClick={() => router.push("/checkout")}
+            onClick={() => requireAuth("/checkout")}
             className={cn(
               "mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-text-primary py-3.5",
               "font-body text-sm font-semibold uppercase tracking-[0.1em] text-white transition-colors",

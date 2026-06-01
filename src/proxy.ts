@@ -6,13 +6,12 @@ import { NextResponse } from "next/server";
 
 const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
-// Authenticated areas. `/cart` is reserved for the F3 server cart; protecting
-// it now is harmless (the route doesn't exist yet) and future-proofs routing.
-const isProtectedRoute = createRouteMatcher([
-  "/account(.*)",
-  "/cart(.*)",
-  "/admin(.*)",
-]);
+// Storefront auth (account, cart, checkout) is handled CLIENT-side by the
+// custom auth modal — deliberately NOT gated here — so guests are never bounced
+// to Clerk's hosted UI. Browsing, viewing the cart, and reaching checkout stay
+// public at the edge; the backend independently enforces auth on every
+// protected API call (the real security boundary). Only the internal admin
+// area is gated at the edge.
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
 /** Role lives in the customised session token (`role` or `*_metadata.role`). */
@@ -27,11 +26,9 @@ function extractRole(claims: Record<string, unknown> | null | undefined): string
 
 const handler = CLERK_ENABLED
   ? clerkMiddleware(async (auth, req) => {
-      if (isProtectedRoute(req)) {
+      if (isAdminRoute(req)) {
         // Unauthenticated → redirected to the sign-in page by Clerk.
         await auth.protect();
-      }
-      if (isAdminRoute(req)) {
         const { sessionClaims } = await auth();
         if (extractRole(sessionClaims as Record<string, unknown>) !== "admin") {
           // Authenticated but not an admin → bounce home (defence in depth;

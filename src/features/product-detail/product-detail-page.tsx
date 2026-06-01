@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Navbar } from "@/features/navbar";
 import { ImageGallery } from "./image-gallery";
@@ -16,6 +15,7 @@ import type { Product as CardProduct } from "@/components/shared/product-card";
 import type { ProductDetailData } from "./data";
 import { SIMILAR_PRODUCTS, YMAL_PRODUCTS } from "./data";
 import { useCart } from "@/hooks/use-cart";
+import { useAuthActions } from "@/features/auth/use-auth-actions";
 import { PLACEHOLDER_IMAGE } from "@/lib/api/mappers";
 import type { ProductColor } from "./data";
 import type { ProductVariant } from "@/types/product";
@@ -84,8 +84,10 @@ export function ProductDetailPage({
   const [adding, setAdding] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
 
-  const router = useRouter();
   const { addItem } = useCart();
+  // "Buy Now" adds to the bag, then routes to checkout — auth-gated like the
+  // cart CTA (guests sign in first, then continue to /checkout).
+  const { requireAuth } = useAuthActions();
 
   // Variant resolution: explicit manual pick wins; otherwise axis-based.
   // Falls through to the first variant when neither is set so add-to-cart
@@ -131,7 +133,7 @@ export function ProductDetailPage({
         unitPrice: variant.price || product.price,
         quantity,
       });
-      if (buyNow) router.push("/checkout");
+      if (buyNow) requireAuth("/checkout");
     } finally {
       setAdding(false);
     }
