@@ -7,7 +7,15 @@ import { getCollectionBySlug, listProducts } from "@/lib/api/products";
 import { toCardProducts } from "@/lib/catalog/presenters";
 import { JsonLd, breadcrumbSchema } from "@/lib/seo/jsonld";
 
-export const dynamic = "force-dynamic";
+// ISR: revalidate every 5 min (plus on-demand via revalidateTag). Replaces
+// force-dynamic so each view is served from cache instead of re-fetching the
+// catalog per request.
+//
+// No generateStaticParams: category pages render on first request and then
+// cache (dynamicParams defaults to true). This keeps `next build` independent
+// of backend availability rather than prebuilding every category against a
+// cross-region backend at build time.
+export const revalidate = 300;
 
 // The approved listing template paginates/sorts client-side, so we hand it a
 // generous page of the category (backend caps page_size at 100). Server-driven

@@ -1,16 +1,18 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import { OrnamentalDivider } from "@/components/shared/ornamental-divider";
-import { fadeUp, stagger } from "@/animations/fade";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 
 const BACKGROUND_SRC = "/images/hero/background-img/image1.png";
 
+// Server Component: the hero is the LCP region, so it carries NO client JS and
+// NO entrance animation. Previously the heading/divider/tagline/CTA animated in
+// from `opacity:0` via Framer Motion, which hid above-the-fold content until
+// hydration. They now render as static HTML in the server response and paint
+// immediately. Markup and styling are unchanged — only the load-time animation
+// (which delayed first paint/LCP) is gone.
 export function Hero() {
   return (
     <section
@@ -39,32 +41,18 @@ export function Hero() {
           {/* Text overlay — vertically centered, anchored left inside the image */}
           <div className="absolute inset-0 flex items-center">
             <div className="mx-auto flex w-full max-w-7xl px-5 sm:px-8 md:px-10 lg:px-12 xl:max-w-screen-2xl xl:px-20 2xl:px-28">
-              <motion.div
-                initial="hidden"
-                animate="visible"
-                variants={stagger(0.05, 0.12)}
-                className="flex flex-col items-start gap-3 max-w-[62%] sm:max-w-[58%] sm:gap-4 md:max-w-md md:gap-5 lg:max-w-2xl lg:gap-6 xl:max-w-3xl xl:gap-7"
-              >
-                <motion.h1
-                  variants={fadeUp}
-                  className="font-display font-medium tracking-tight text-white sm:text-text-primary leading-[1.05] text-[clamp(1.25rem,5.5vw,4.75rem)]"
-                >
+              <div className="flex flex-col items-start gap-3 max-w-[62%] sm:max-w-[58%] sm:gap-4 md:max-w-md md:gap-5 lg:max-w-2xl lg:gap-6 xl:max-w-3xl xl:gap-7">
+                <h1 className="font-display font-medium tracking-tight text-white sm:text-text-primary leading-[1.05] text-[clamp(1.25rem,5.5vw,4.75rem)]">
                   Timeless Sarees.
                   <br />
                   Traditional Elegance.
-                </motion.h1>
+                </h1>
 
-                <motion.div
-                  variants={fadeUp}
-                  className="w-full max-w-[7rem] sm:max-w-xs md:max-w-md lg:max-w-lg"
-                >
+                <div className="w-full max-w-[7rem] sm:max-w-xs md:max-w-md lg:max-w-lg">
                   <OrnamentalDivider />
-                </motion.div>
+                </div>
 
-                <motion.p
-                  variants={fadeUp}
-                  className="font-display italic text-white/80 sm:text-text-secondary text-[clamp(0.7rem,2vw,1.125rem)] leading-snug"
-                >
+                <p className="font-display italic text-white/80 sm:text-text-secondary text-[clamp(0.7rem,2vw,1.125rem)] leading-snug">
                   <span aria-hidden className="mr-1 text-gold sm:mr-2">
                     ✦
                   </span>
@@ -72,9 +60,9 @@ export function Hero() {
                   <span aria-hidden className="ml-1 text-gold sm:ml-2">
                     ✦
                   </span>
-                </motion.p>
+                </p>
 
-                <motion.div variants={fadeUp} className="pt-0.5 sm:pt-1">
+                <div className="pt-0.5 sm:pt-1">
                   <Link
                     href="/collections"
                     className={cn(
@@ -91,8 +79,8 @@ export function Hero() {
                       strokeWidth={2}
                     />
                   </Link>
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

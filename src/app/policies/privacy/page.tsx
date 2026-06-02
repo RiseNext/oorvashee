@@ -3,9 +3,11 @@ import { PolicyPage } from "@/components/shared/policy-page";
 import { getPolicyDoc } from "@/lib/api/policies";
 import { PRIVACY_POLICY } from "@/config/policies";
 
-// Admin-editable copy lives in the backend — render per request so edits show
-// up without a rebuild. Falls back to the seeded config if the API is down.
-export const dynamic = "force-dynamic";
+// Admin-editable copy lives in the backend. ISR: cached and revalidated hourly,
+// and immediately on-demand via revalidateTag("policies") after an admin edit —
+// so changes still appear without a rebuild. Falls back to the seeded config if
+// the API is down.
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: PRIVACY_POLICY.title,

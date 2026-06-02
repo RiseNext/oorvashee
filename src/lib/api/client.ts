@@ -16,6 +16,15 @@ export type RequestOptions = Omit<RequestInit, "body"> & {
   token?: string | null;
   /** Required on `/checkout/orders` + `/payments/verify` (F4). */
   idempotencyKey?: string;
+  /**
+   * Next.js server-side ISR window in seconds (maps to `fetch`'s
+   * `next.revalidate`). Server-only: the browser fetch ignores it, so passing
+   * it from a catalog read is safe even when the same helper runs on the client.
+   * Only set this for cacheable, non-personalized GETs.
+   */
+  revalidate?: number | false;
+  /** Cache tags for on-demand invalidation via `revalidateTag` (server-only). */
+  tags?: string[];
 };
 
 /**
@@ -45,7 +54,7 @@ export async function apiFetch<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { body, query, headers, token, idempotencyKey, ...rest } = options;
+  const { body, query, headers, token, idempotencyKey, revalidate, tags, ...rest } = options;
 
   const finalHeaders: Record<string, string> = {
     "Content-Type": "application/json",
@@ -55,8 +64,21 @@ export async function apiFetch<T>(
   if (token) finalHeaders.Authorization = `Bearer ${token}`;
   if (idempotencyKey) finalHeaders["Idempotency-Key"] = idempotencyKey;
 
+  // Server-side caching hints. Only attached when a caller opts in (catalog
+  // reads), so mutations and authenticated/token'd requests stay uncached.
+  const nextInit =
+    revalidate !== undefined || tags
+      ? {
+          next: {
+            ...(revalidate !== undefined ? { revalidate } : {}),
+            ...(tags ? { tags } : {}),
+          },
+        }
+      : undefined;
+
   const res = await fetch(buildUrl(path, query), {
     ...rest,
+    ...nextInit,
     headers: finalHeaders,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });

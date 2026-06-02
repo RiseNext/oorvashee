@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { toast } from "sonner";
 import { Navbar } from "@/features/navbar";
 import { ImageGallery } from "./image-gallery";
@@ -8,9 +9,15 @@ import { BuyZone } from "./buy-zone";
 import { AccordionSections } from "./accordion-sections";
 import { PolicyAccordion } from "@/components/shared/policy-accordion";
 import { StickyHeader } from "./sticky-header";
-import { ProductsSection } from "./products-section";
 import { BrandStory } from "./brand-story";
 import { ReviewsSection } from "./reviews-section";
+
+// Below-the-fold related-product rails (Similar / You May Also Like) pull the
+// motion-driven ProductCard grid, so code-split them out of the PDP's initial
+// client chunk. SSR stays on (default) so the rendered HTML/SEO is unchanged.
+const ProductsSection = dynamic(() =>
+  import("./products-section").then((m) => m.ProductsSection),
+);
 import type { Product as CardProduct } from "@/components/shared/product-card";
 import type { ProductDetailData } from "./data";
 import { SIMILAR_PRODUCTS, YMAL_PRODUCTS } from "./data";

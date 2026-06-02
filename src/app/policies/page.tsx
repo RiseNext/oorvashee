@@ -7,7 +7,8 @@ import { PageHeader } from "@/components/shared/page-header";
 import { siteConfig } from "@/config/site";
 import { listPolicies } from "@/lib/api/policies";
 
-export const dynamic = "force-dynamic";
+// ISR: cached + revalidated hourly, bustable on-demand via revalidateTag("policies").
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Policies & Information",

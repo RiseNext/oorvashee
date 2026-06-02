@@ -1,18 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { AnimatePresence } from "motion/react";
 import { Heart, Menu, Search, User, X } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { SIGN_IN_URL } from "@/lib/auth/config";
 import { useAuthSession } from "@/lib/auth/use-auth-session";
 import { CartButton } from "./cart-button";
-import { MobileMenuPanel } from "./mobile-menu-panel";
-import { MobileSearchPanel } from "./mobile-search-panel";
 import { NavDropdown } from "./nav-dropdown";
 import { NavLink } from "./nav-link";
 import {
@@ -22,12 +20,27 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+// The mobile menu/search overlays are interaction-only (tap to open) and hold
+// ALL of the navbar's Framer Motion (AnimatePresence + the panels' slide/fade).
+// Load them on first open so `motion` is not part of the navbar's initial
+// bundle — which removes it from first-load JS on every route that doesn't
+// otherwise use motion. ssr:false: a closed overlay has no server output, and
+// it only renders after a client interaction, so there's no hydration mismatch.
+const MobileOverlays = dynamic(
+  () => import("./mobile-overlays").then((m) => m.MobileOverlays),
+  { ssr: false },
+);
+
 const desktopIconBtn =
   "inline-flex h-11 w-11 items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-white hover:text-black hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40";
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  // Latches true the first time the menu/search opens; stays true so the
+  // dynamically-loaded overlays remain mounted and AnimatePresence can play
+  // exit animations on close.
+  const [overlaysMounted, setOverlaysMounted] = useState(false);
   const [visible, setVisible] = useState(true);
   const [query, setQuery] = useState("");
   const lastScrollY = useRef(0);
@@ -183,6 +196,7 @@ export function Navbar() {
               onClick={() => {
                 setMobileOpen((v) => !v);
                 setSearchOpen(false);
+                setOverlaysMounted(true);
               }}
               className={cn(
                 "inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-white hover:text-black hover:scale-110 focus-visible:outline-none",
@@ -203,6 +217,7 @@ export function Navbar() {
               onClick={() => {
                 setSearchOpen((v) => !v);
                 setMobileOpen(false);
+                setOverlaysMounted(true);
               }}
               className={cn(
                 "inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-white hover:text-black hover:scale-110 focus-visible:outline-none",
@@ -227,17 +242,16 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Mobile dropdown panels */}
-        <AnimatePresence initial={false}>
-          {mobileOpen ? (
-            <MobileMenuPanel onClose={() => setMobileOpen(false)} />
-          ) : null}
-        </AnimatePresence>
-        <AnimatePresence initial={false}>
-          {searchOpen ? (
-            <MobileSearchPanel onClose={() => setSearchOpen(false)} />
-          ) : null}
-        </AnimatePresence>
+        {/* Mobile dropdown panels — code-split; mounted on first open, then kept
+            mounted so AnimatePresence can still play exit animations on close. */}
+        {overlaysMounted ? (
+          <MobileOverlays
+            mobileOpen={mobileOpen}
+            searchOpen={searchOpen}
+            onCloseMenu={() => setMobileOpen(false)}
+            onCloseSearch={() => setSearchOpen(false)}
+          />
+        ) : null}
       </div>
     </header>
   );

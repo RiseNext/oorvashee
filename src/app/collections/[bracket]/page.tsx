@@ -4,11 +4,17 @@ import { notFound } from "next/navigation";
 import { SareeListingPage } from "@/features/saree-listing/saree-listing-page";
 import { listProducts } from "@/lib/api/products";
 import { toCardProducts } from "@/lib/catalog/presenters";
-import { getPriceBracket } from "@/lib/catalog/price-brackets";
+import { getPriceBracket, PRICE_BRACKETS } from "@/lib/catalog/price-brackets";
 
-// Live, backend-filtered budget collection. Render per request (like the rest
-// of the catalog) so `next build` never depends on backend availability.
-export const dynamic = "force-dynamic";
+// ISR: the budget brackets are a fixed, static set, so prebuild all of them and
+// revalidate every 5 min (plus on-demand via revalidateTag("products")). The
+// product fetch below is caught so the build stays backend-independent.
+export const revalidate = 300;
+
+// Brackets come from static config — no backend needed to enumerate them.
+export function generateStaticParams() {
+  return PRICE_BRACKETS.map((b) => ({ bracket: b.slug }));
+}
 
 // The approved listing template paginates/sorts client-side; hand it a generous
 // page (backend caps page_size at 100). Server-driven pagination is a later
@@ -44,13 +50,13 @@ export default async function BudgetCollectionPage({
     priceMin: b.priceMin,
     priceMax: b.priceMax,
     pageSize: PAGE_SIZE,
-  });
+  }).catch(() => null);
 
   return (
     <SareeListingPage
       title={b.title}
       subtitle="Sarees For You"
-      products={toCardProducts(page.items)}
+      products={page ? toCardProducts(page.items) : []}
       emptyTitle="Nothing in this range yet"
       emptyBody="New pieces are added often — explore our other collections in the meantime."
     />

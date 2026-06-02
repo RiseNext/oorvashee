@@ -13,6 +13,11 @@ import { apiFetch } from "./client";
 
 const useMock = clientEnv.NEXT_PUBLIC_USE_MOCK_API;
 
+// Policies are admin-edited but change rarely → cache for an hour and bust on
+// demand via revalidateTag("policies") after an admin edit.
+const POLICY_REVALIDATE = 3600;
+const TAG_POLICIES = "policies";
+
 /** Backend `PolicyRead` shape (snake-case-free — already lean). */
 interface BackendPolicy {
   key: string;
@@ -42,7 +47,10 @@ function mapPolicy(p: BackendPolicy): PolicyDoc {
 export async function listPolicies(): Promise<PolicyDoc[]> {
   if (useMock) return PRODUCT_POLICIES;
   try {
-    const rows = await apiFetch<BackendPolicy[]>("/policies");
+    const rows = await apiFetch<BackendPolicy[]>("/policies", {
+      revalidate: POLICY_REVALIDATE,
+      tags: [TAG_POLICIES],
+    });
     return rows.length > 0 ? rows.map(mapPolicy) : PRODUCT_POLICIES;
   } catch {
     return PRODUCT_POLICIES;
@@ -56,7 +64,10 @@ export async function listPolicies(): Promise<PolicyDoc[]> {
 export async function getPolicyDoc(slug: string): Promise<PolicyDoc | null> {
   if (useMock) return POLICIES_BY_SLUG[slug] ?? null;
   try {
-    const row = await apiFetch<BackendPolicy>(`/policies/${slug}`);
+    const row = await apiFetch<BackendPolicy>(`/policies/${slug}`, {
+      revalidate: POLICY_REVALIDATE,
+      tags: [TAG_POLICIES],
+    });
     return mapPolicy(row);
   } catch {
     return POLICIES_BY_SLUG[slug] ?? null;

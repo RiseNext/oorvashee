@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { clientEnv } from "@/lib/env";
 import type {
   Collection,
@@ -28,6 +29,34 @@ import { mockCollections, mockProducts } from "./mock-data";
 const useMock = clientEnv.NEXT_PUBLIC_USE_MOCK_API;
 
 const DEFAULT_PAGE_SIZE = 12;
+
+// --- ISR windows (seconds) for server-side fetch caching -------------------
+// Catalog lists change with new arrivals/edits → short window. Product detail
+// (price/stock) → medium. Category taxonomy changes rarely → long. All are also
+// bustable on demand via revalidateTag (see app/api/revalidate/route.ts).
+const CATALOG_REVALIDATE = 300; // 5 min
+const PRODUCT_REVALIDATE = 600; // 10 min
+const CATEGORY_REVALIDATE = 3600; // 1 hour
+
+// Cache tags — the backend (or an admin Server Action) busts these after edits.
+const TAG_PRODUCTS = "products";
+const TAG_CATEGORIES = "categories";
+const productTag = (slug: string) => `product:${slug}`;
+
+/**
+ * The backend has a single `/categories` group endpoint that several helpers
+ * (`listCollections`, `getCollectionBySlug`) read. Wrapping it in React `cache`
+ * dedupes those calls to ONE network request per render — the home page used to
+ * fire `/categories` five times (once per collection lookup). The fetch is also
+ * ISR-cached + tagged so it costs nothing across requests until invalidated.
+ */
+const fetchCategoryGroup = cache(
+  (): Promise<BackendCategoryGroup> =>
+    apiFetch<BackendCategoryGroup>("/categories", {
+      revalidate: CATEGORY_REVALIDATE,
+      tags: [TAG_CATEGORIES],
+    }),
+);
 
 // ---------------------------------------------------------------------------
 // Mock helpers (unchanged — keeps the UI byte-identical while mock is on)
@@ -120,6 +149,8 @@ export async function listProducts(
       page,
       page_size: pageSize,
     },
+    revalidate: CATALOG_REVALIDATE,
+    tags: [TAG_PRODUCTS],
   });
   return mapPage(res, mapProductSummary, { page, pageSize });
 }
@@ -147,6 +178,8 @@ export async function getRelatedProducts(
       // Over-fetch by one so dropping the current product still fills the rail.
       page_size: limit + 1,
     },
+    revalidate: PRODUCT_REVALIDATE,
+    tags: [TAG_PRODUCTS],
   });
   return res.items
     .map(mapProductSummary)
@@ -159,7 +192,10 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     return mockProducts.find((p) => p.slug === slug) ?? null;
   }
   try {
-    const dto = await apiFetch<BackendProductRead>(`/products/${slug}`);
+    const dto = await apiFetch<BackendProductRead>(`/products/${slug}`, {
+      revalidate: PRODUCT_REVALIDATE,
+      tags: [TAG_PRODUCTS, productTag(slug)],
+    });
     return mapProduct(dto);
   } catch (error) {
     // Unknown slug → 404 → null so the route can render notFound().
@@ -172,7 +208,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 
 export async function listCollections(): Promise<Collection[]> {
   if (useMock) return mockCollections;
-  const group = await apiFetch<BackendCategoryGroup>("/categories");
+  const group = await fetchCategoryGroup();
   return mapCollections(group);
 }
 
@@ -183,8 +219,9 @@ export async function getCollectionBySlug(
     return mockCollections.find((c) => c.slug === slug) ?? null;
   }
   // Backend has no per-collection detail endpoint; resolve from the grouped
-  // categories response (any kind, not just `collection`).
-  const group = await apiFetch<BackendCategoryGroup>("/categories");
+  // categories response (any kind, not just `collection`). Goes through the
+  // cached group fetch, so multiple lookups in one render share one request.
+  const group = await fetchCategoryGroup();
   const match = flattenCategoryGroup(group).find((c) => c.slug === slug);
   return match ? mapCategoryToCollection(match) : null;
 }
@@ -196,6 +233,8 @@ export async function getFeaturedProducts(
   // No dedicated /products/featured endpoint — use the sort param.
   const res = await apiFetch<BackendPage<BackendProductListItem>>("/products", {
     query: { sort: "featured", page: 1, page_size: limit },
+    revalidate: CATALOG_REVALIDATE,
+    tags: [TAG_PRODUCTS],
   });
   return res.items.map(mapProductSummary);
 }

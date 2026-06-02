@@ -3,7 +3,8 @@ import { PolicyPage } from "@/components/shared/policy-page";
 import { getPolicyDoc } from "@/lib/api/policies";
 import { REFUND_POLICY } from "@/config/policies";
 
-export const dynamic = "force-dynamic";
+// ISR: cached + revalidated hourly, bustable on-demand via revalidateTag("policies").
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: REFUND_POLICY.title,

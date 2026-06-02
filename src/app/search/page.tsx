@@ -4,10 +4,9 @@ import { SareeListingPage } from "@/features/saree-listing/saree-listing-page";
 import { listProducts } from "@/lib/api/products";
 import { toCardProducts } from "@/lib/catalog/presenters";
 
-// Live search results — render per request (like the rest of the catalog) so
-// `next build` never depends on backend availability.
-export const dynamic = "force-dynamic";
-
+// Search depends on the `?q=` query string, so this route always renders
+// dynamically — no force-dynamic needed. The underlying catalog fetch is cached
+// per query for a few minutes (see lib/api/products) to keep repeat searches fast.
 export const metadata: Metadata = {
   title: "Search",
   description: "Search the Oorvashee collection of handwoven sarees.",

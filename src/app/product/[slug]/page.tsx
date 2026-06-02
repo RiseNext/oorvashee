@@ -9,9 +9,15 @@ import { getProductBySlug, getRelatedProducts } from "@/lib/api/products";
 import { primaryDepartment, toCardProducts } from "@/lib/catalog/presenters";
 import { JsonLd, breadcrumbSchema, productSchema } from "@/lib/seo/jsonld";
 
-// Catalog content is live (price, stock, availability) — render per request.
-// This also keeps `next build` independent of backend availability.
-export const dynamic = "force-dynamic";
+// ISR: product detail (price/stock/availability) revalidates every 10 min and
+// on-demand via revalidateTag("products" / "product:<slug>") after an admin
+// edit — so pages are served from cache instead of re-rendered per request.
+//
+// We intentionally do NOT prebuild slugs via generateStaticParams: pages render
+// on first request and then cache (dynamicParams defaults to true). This keeps
+// `next build` independent of backend availability and avoids caching a stale
+// 404 if a product fetch transiently fails during a build-time prerender.
+export const revalidate = 600;
 
 // Dedupe the product fetch across generateMetadata + the page render.
 const loadProduct = cache((slug: string) => getProductBySlug(slug));
