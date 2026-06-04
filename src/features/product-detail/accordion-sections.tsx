@@ -84,7 +84,7 @@ export function AccordionSections({ product }: { product: ProductDetailData }) {
     },
     {
       id: "return",
-      label: "Return & Exchange",
+      label: "Returns & Refunds",
       content: <p className="whitespace-pre-line">{product.returnPolicy}</p>,
     },
     {

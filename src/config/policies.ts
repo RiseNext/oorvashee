@@ -28,9 +28,9 @@ export const PRIVACY_POLICY: PolicyDoc = {
   summary:
     "How we collect, use, and safeguard your personal information — and our promise never to sell it.",
   paragraphs: [
-    "Oorvashee respects the privacy of its customers and is committed to protecting personal information. We collect information such as names, contact details, addresses, and order-related information solely for business operations and customer service purposes.",
+    "Oorvashee Saree House respects the privacy of its customers and is committed to protecting personal information. We collect information such as names, contact details, addresses, and order-related information solely for business operations and customer service purposes.",
     "The information collected helps us process orders, provide customer support, improve our services, communicate order updates, and deliver a personalized shopping experience. We implement appropriate security measures to safeguard customer data against unauthorized access or misuse.",
-    "Oorvashee does not sell customer information to third parties. Certain trusted service providers, such as payment gateways, logistics partners, and analytics platforms, may access limited information required to perform their services. By using our website, customers consent to the practices outlined in this policy.",
+    "Oorvashee Saree House does not sell customer information to third parties. Certain trusted service providers, such as payment gateways, logistics partners, and analytics platforms, may access limited information required to perform their services. By using our website, customers consent to the practices outlined in this policy.",
   ],
 };
 
@@ -38,23 +38,21 @@ export const SHIPPING_POLICY: PolicyDoc = {
   slug: "shipping",
   title: "Shipping Policy",
   summary:
-    "Order processing times, delivery timelines, and how tracking is shared after dispatch.",
+    "Domestic delivery across India only — metro orders in 1–2 days, other locations vary; tracking shared after dispatch.",
   paragraphs: [
-    "Oorvashee aims to process and dispatch orders efficiently to ensure a smooth shopping experience. Orders are generally processed within one to three business days after successful payment confirmation.",
-    "Delivery timelines vary depending on customer location, courier network availability, weather conditions, and public holidays. Most domestic orders are delivered within a few business days, although remote locations may require additional transit time.",
-    "Customers receive shipment tracking information once orders are dispatched. While Oorvashee works with trusted logistics partners, unforeseen delays beyond our control may occasionally occur. Our support team remains available to assist customers with shipment-related concerns.",
+    "We currently ship across India only; international delivery is not available. Customers outside India may place orders using international payment methods, provided the delivery address is within India.",
+    "Orders are generally processed and dispatched within one to three business days after successful payment confirmation. Metro cities are usually delivered within 1–2 business days, while delivery timelines for other locations across India may vary depending on the destination, courier network, weather, and public holidays.",
+    "Customers receive shipment tracking information once their order is dispatched. While we work with trusted logistics partners, occasional delays beyond our control may arise; our support team remains available on WhatsApp to assist with any shipment-related concerns.",
   ],
 };
 
 export const REFUND_POLICY: PolicyDoc = {
   slug: "refund",
-  title: "Refund Policy",
-  summary:
-    "When refunds apply, how requests are reviewed, and how approved refunds are processed.",
+  title: "Returns & Refunds",
+  summary: "All sales are final — no returns, exchanges, or refunds are accepted.",
   paragraphs: [
-    "Customer satisfaction is important to Oorvashee. Refund requests may be considered for products that arrive damaged, defective, incorrect, or significantly different from their description. Customers should report such issues within the specified return window.",
-    "All refund requests undergo a review process that may include verification of photographs, videos, order details, and product condition. Once approved, refunds are initiated through the original payment method used during purchase.",
-    "Refund processing times may vary depending on payment providers and banking institutions. Products that show signs of use, damage caused after delivery, or requests submitted outside the permitted period may not qualify for refunds.",
+    "All sales are final. No returns, exchanges, or refunds are accepted once an order has been placed.",
+    "We encourage customers to review product details, descriptions, measurements, and images carefully before completing a purchase. If you have any questions about a product, please contact us on WhatsApp before ordering — our team will gladly help you choose with confidence.",
   ],
 };
 
@@ -62,11 +60,11 @@ export const TERMS_AND_CONDITIONS: PolicyDoc = {
   slug: "terms",
   title: "Terms & Conditions",
   summary:
-    "The terms you agree to when using Oorvashee, including orders, pricing, and intellectual property.",
+    "The terms you agree to when shopping with Oorvashee Saree House — payments, orders, and intellectual property.",
   paragraphs: [
-    "By accessing and using the Oorvashee website, customers agree to comply with all applicable terms, policies, and legal requirements. The website content, products, pricing, and services are subject to change without prior notice.",
-    "All orders placed through our platform are subject to product availability and verification. Oorvashee reserves the right to cancel or refuse orders in cases involving pricing errors, stock issues, fraudulent activity, or policy violations.",
-    "All intellectual property, including logos, designs, product images, content, and branding elements, remains the exclusive property of Oorvashee. Unauthorized reproduction, distribution, or commercial use of website content is strictly prohibited.",
+    "By accessing and using the Oorvashee Saree House website, customers agree to comply with all applicable terms, policies, and legal requirements. The website content, products, pricing, and services are subject to change without prior notice.",
+    "All orders are prepaid — we accept online payments only, and Cash on Delivery is not available. All sales are final, with no returns, exchanges, or refunds. Orders are subject to product availability and verification, and Oorvashee Saree House reserves the right to cancel or refuse orders involving pricing errors, stock issues, fraudulent activity, or policy violations.",
+    "All intellectual property, including logos, designs, product images, content, and branding elements, remains the exclusive property of Oorvashee Saree House. Unauthorized reproduction, distribution, or commercial use of website content is strictly prohibited.",
   ],
 };
 
@@ -92,11 +90,11 @@ export const POLICIES_BY_SLUG: Record<string, PolicyDoc> = {
 /** About Us — long-form brand story for `/about`. */
 export const ABOUT_US = {
   title: "About Us",
-  tagline: "Premium ethnic fashion, woven with heritage and care.",
+  tagline: "26+ years of trusted experience — Oorvashee Saree House, evolved from the legacy of VR Silks.",
   paragraphs: [
-    "Oorvashee is a premium ethnic fashion destination dedicated to bringing traditional Indian elegance to modern customers. Our collections are carefully curated to showcase timeless craftsmanship, premium fabrics, and contemporary designs that celebrate the beauty of Indian culture. We believe fashion is not just about clothing but about expressing confidence, heritage, and individuality.",
-    "Our team works closely with trusted suppliers and artisans to ensure that every product reflects quality, authenticity, and value. From festive wear and designer sarees to everyday ethnic collections, we focus on offering products that meet the expectations of today's customers while preserving traditional artistry.",
-    "At Oorvashee, customer satisfaction is at the heart of everything we do. We continuously improve our shopping experience through secure payments, reliable delivery, responsive support, and a commitment to excellence. Our vision is to become one of India's most trusted online destinations for ethnic fashion and lifestyle products.",
+    "Oorvashee Saree House is the flagship retail and online brand of a saree business with over 26 years of trusted experience. Evolved from the well-loved legacy of VR Silks, we carry forward a heritage built on authenticity, craftsmanship, and the kind of personal service that has earned the loyalty of generations of customers.",
+    "Our collections celebrate the timeless artistry of the Indian saree — pure silks, handwoven weaves, cottons, and designer pieces — each chosen for its quality, finish, and character. We work closely with trusted weavers and suppliers so that every saree reflects the standard our customers have come to expect from the VR Silks name.",
+    "Today, Oorvashee Saree House blends that traditional craftsmanship with a modern, convenient shopping experience — secure online payments, reliable pan-India delivery, and responsive support on WhatsApp. Our commitment remains the same as it was over 26 years ago: beautiful sarees, honest value, and customers we can serve for a lifetime.",
   ],
 } as const;
 
@@ -104,8 +102,8 @@ export const ABOUT_US = {
 export const CONTACT_INTRO = {
   title: "Contact Us",
   paragraphs: [
-    "Oorvashee values every customer and strives to provide prompt, professional, and reliable support. Whether you have questions about products, orders, shipping, returns, or general inquiries, our support team is committed to assisting you throughout your shopping journey.",
-    "Customers can reach us through our official website, email support channels, and customer service platforms. We encourage customers to contact us for product recommendations, order tracking assistance, exchange requests, and any concerns related to their shopping experience.",
-    "We continuously work to improve our customer service standards and aim to respond to all inquiries within a reasonable timeframe. Business partnerships, wholesale inquiries, and collaboration requests are also welcome through our official communication channels.",
+    "Oorvashee Saree House values every customer and is committed to prompt, professional, and reliable support. Whether you have questions about a product, your order, or shipping, our team is here to help you through your shopping journey.",
+    "Support is available exclusively on WhatsApp, Monday to Sunday, 11:00 AM – 8:30 PM IST. For the quickest assistance — product recommendations, order tracking, or general queries — message us on WhatsApp and we'll get back to you within our support hours.",
+    "Business partnerships, bulk and wholesale enquiries, and collaboration requests are also welcome through our official channels.",
   ],
 } as const;

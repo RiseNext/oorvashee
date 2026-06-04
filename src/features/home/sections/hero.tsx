@@ -5,7 +5,7 @@ import { OrnamentalDivider } from "@/components/shared/ornamental-divider";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 
-const BACKGROUND_SRC = "/images/hero/background-img/image1.png";
+const BACKGROUND_SRC = "/images/hero/background-img/image1.avif";
 
 // Server Component: the hero is the LCP region, so it carries NO client JS and
 // NO entrance animation. Previously the heading/divider/tagline/CTA animated in

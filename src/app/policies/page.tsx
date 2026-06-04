@@ -53,7 +53,7 @@ export default async function PoliciesOverviewPage() {
             >
               <h2 className="font-display text-lg font-semibold text-text-primary">Contact Us</h2>
               <p className="mt-1.5 font-body text-sm leading-relaxed text-text-secondary">
-                Prompt, professional support for products, orders, shipping, and returns.
+                Prompt, professional support on WhatsApp for products, orders, and shipping.
               </p>
               <span className="mt-3 inline-flex items-center gap-1 font-body text-xs font-medium uppercase tracking-[0.12em] text-cta-fill">
                 Get in touch <ArrowRight className="h-3.5 w-3.5" />

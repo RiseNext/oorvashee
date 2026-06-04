@@ -39,7 +39,7 @@ export function SareesForYou() {
     >
       {/* Section background */}
       <Image
-        src="/images/prize/backgroudn/image.png"
+        src="/images/prize/backgroudn/image.avif"
         alt=""
         fill
         sizes="100vw"

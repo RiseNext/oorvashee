@@ -66,7 +66,7 @@ export function useCheckout() {
 
   function openRazorpay(placed: PlacedOrder, customer: CheckoutCustomerInput) {
     if (!Razorpay || !placed.payment) {
-      toast.error("Online payment is unavailable right now. Try Cash on Delivery.");
+      toast.error("Online payment is unavailable right now. Please try again in a moment.");
       setPlacing(false);
       return;
     }

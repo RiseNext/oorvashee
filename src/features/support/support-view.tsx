@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MessageCircle, Mail, Phone, Truck, RotateCcw, ShieldCheck, PackageSearch } from "lucide-react";
+import { MessageCircle, Mail, Truck, BadgeCheck, ShieldCheck, PackageSearch } from "lucide-react";
 
 import { Navbar } from "@/features/navbar";
 import { PageHeader } from "@/components/shared/page-header";
@@ -11,16 +11,27 @@ const { contact } = siteConfig;
 const waNumber = contact.whatsapp.replace(/\D/g, "");
 const freeShip = formatPrice(siteConfig.freeShippingThreshold);
 
+// Support is WhatsApp-only (plus email) — no phone/call channel.
 const CHANNELS = [
   { icon: MessageCircle, label: "WhatsApp", value: contact.whatsapp, href: `https://wa.me/${waNumber}`, external: true },
   { icon: Mail, label: "Email", value: contact.email, href: `mailto:${contact.email}`, external: true },
-  { icon: Phone, label: "Call us", value: contact.phone, href: `tel:${contact.phone.replace(/\s/g, "")}`, external: true },
 ] as const;
 
 const ASSURANCES = [
-  { icon: Truck, title: "Shipping & Delivery", body: `Dispatched in 1–2 business days. Free shipping on orders above ${freeShip}. Pan-India delivery in 3–7 business days.` },
-  { icon: RotateCcw, title: "Returns & Exchange", body: "Easy 7-day returns on unused pieces in original packaging. Email us with your order number to begin." },
-  { icon: ShieldCheck, title: "Secure Payments", body: "Pay by UPI, card, or netbanking via Razorpay, or choose Cash on Delivery. Your details are always encrypted." },
+  { icon: Truck, title: "Shipping & Delivery", body: `We ship across India only. Metro cities in 1–2 business days; other locations vary by destination. Free shipping on orders above ${freeShip}. International delivery is not available.` },
+  { icon: BadgeCheck, title: "Returns & Refunds", body: "All sales are final. We do not accept returns, exchanges, or refunds — please review product details carefully before placing your order." },
+  { icon: ShieldCheck, title: "Secure Payments", body: "Pay securely online via Razorpay — UPI, card, or netbanking. Cash on Delivery is not available; we accept prepaid online payments only." },
+] as const;
+
+const FAQS = [
+  { q: "Do you offer Cash on Delivery?", a: "No. We currently accept prepaid online payments only." },
+  { q: "Do you accept returns?", a: "No. All sales are final. Returns are not accepted." },
+  { q: "Do you offer exchanges?", a: "No. Exchanges are not available." },
+  { q: "Can I get a refund?", a: "No. Refunds are not offered." },
+  { q: "Do you ship internationally?", a: "We currently ship only within India." },
+  { q: "I live outside India. Can I place an order?", a: "Yes. International payment methods can be used if the delivery address is within India." },
+  { q: "How can I contact support?", a: "Support is available via WhatsApp only." },
+  { q: "What are your support hours?", a: `${siteConfig.contact.supportHours}.` },
 ] as const;
 
 export function SupportView() {
@@ -64,6 +75,10 @@ export function SupportView() {
                 );
               })}
             </div>
+            <p className="mt-4 font-body text-sm text-text-secondary">
+              For assistance, please contact us via WhatsApp. Support hours:{" "}
+              <span className="font-semibold text-text-primary">{contact.supportHours}</span>.
+            </p>
           </section>
 
           {/* Order help */}
@@ -110,6 +125,31 @@ export function SupportView() {
                   </div>
                 );
               })}
+            </div>
+          </section>
+
+          {/* FAQ */}
+          <section>
+            <h2 className="mb-5 font-body text-sm font-bold uppercase tracking-[0.18em] text-text-primary">
+              Frequently asked questions
+            </h2>
+            <div className="divide-y divide-border-light overflow-hidden rounded-xl border border-border-light bg-bg-card">
+              {FAQS.map((f) => (
+                <details key={f.q} className="group">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-body text-sm font-semibold text-text-primary marker:hidden">
+                    {f.q}
+                    <span
+                      aria-hidden
+                      className="shrink-0 text-lg leading-none text-text-muted transition-transform duration-200 group-open:rotate-45"
+                    >
+                      +
+                    </span>
+                  </summary>
+                  <p className="px-5 pb-4 font-body text-sm leading-relaxed text-text-secondary">
+                    {f.a}
+                  </p>
+                </details>
+              ))}
             </div>
           </section>
         </div>

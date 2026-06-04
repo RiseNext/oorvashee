@@ -10,7 +10,7 @@ export const siteConfig = {
   tagline: "Timeless Sarees. Traditional Elegance.",
   storyTagline: "Every Weave Tells a Story of Grace",
   description:
-    "Oorvashee Saree House — handwoven sarees in pure silk, cotton, and heritage weaves. Timeless designs, crafted with care.",
+    "Oorvashee Saree House — handwoven sarees in pure silk, cotton, and heritage weaves. 26+ years of trusted experience, evolved from the legacy of VR Silks.",
   url: "https://oorvashee.com",
   ogImage: "/og.jpg",
   locale: "en-IN",
@@ -24,7 +24,7 @@ export const siteConfig = {
     phone: "+91 97037 66779",
     whatsapp: "+91 97037 66779",
     address: "H No: 6-3-2100/594, Plot No: S4/C-594, Venkatakala Nilayam, NGO's Colony, Vanastalipuram, Rangareddy Dist, Telangana — 500070",
-    supportHours: "Monday to Saturday, 10:00 AM to 7:00 PM IST",
+    supportHours: "Monday to Sunday, 11:00 AM – 8:30 PM IST",
   },
   social: {
     instagram: "https://instagram.com/oorvashee",

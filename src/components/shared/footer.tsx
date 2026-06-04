@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MessageCircle, Mail, Phone, MapPin } from "lucide-react";
+import { MessageCircle, Mail, MapPin } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 
@@ -95,7 +95,7 @@ export function Footer() {
       {/* Textured brand backdrop (embossed crest). `bg-[#54100D]` above is the
           graceful fallback if the asset is missing or still loading. */}
       <Image
-        src="/images/footer/footer-bg.png"
+        src="/images/footer/footer-bg.avif"
         alt=""
         aria-hidden
         fill
@@ -175,9 +175,9 @@ export function Footer() {
             </ul>
 
             <address className="mt-6 space-y-2.5 not-italic">
-              <a href={`tel:${siteConfig.contact.phone.replace(/\s/g, "")}`} className={`flex items-start gap-2 ${linkClass}`}>
-                <Phone className="mt-0.5 h-4 w-4 shrink-0 text-gold" strokeWidth={1.6} />
-                {siteConfig.contact.phone}
+              <a href={`https://wa.me/${waNumber}`} target="_blank" rel="noopener noreferrer" className={`flex items-start gap-2 ${linkClass}`}>
+                <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-gold" strokeWidth={1.6} />
+                {siteConfig.contact.whatsapp}
               </a>
               <a href={`mailto:${siteConfig.contact.email}`} className={`flex items-start gap-2 ${linkClass}`}>
                 <Mail className="mt-0.5 h-4 w-4 shrink-0 text-gold" strokeWidth={1.6} />
@@ -188,6 +188,9 @@ export function Footer() {
                 <span>{siteConfig.contact.address}</span>
               </p>
             </address>
+            <p className="mt-3 font-body text-xs text-white/55">
+              WhatsApp support · {siteConfig.contact.supportHours}
+            </p>
 
             <a
               href={`https://wa.me/${waNumber}`}

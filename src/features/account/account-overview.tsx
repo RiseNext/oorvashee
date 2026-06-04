@@ -11,7 +11,7 @@ const CARDS = [
   { href: "/wishlist", label: "Wishlist", desc: "Pieces you've saved for later", icon: Heart },
   { href: "/account/addresses", label: "Addresses", desc: "Manage your delivery details", icon: MapPin },
   { href: "/account/profile", label: "Profile", desc: "Your account information", icon: UserRound },
-  { href: "/support", label: "Help & Support", desc: "Order help, shipping & returns", icon: LifeBuoy },
+  { href: "/support", label: "Help & Support", desc: "Order help, shipping & FAQs", icon: LifeBuoy },
 ] as const;
 
 export function AccountOverview() {

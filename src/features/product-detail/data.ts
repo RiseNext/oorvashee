@@ -90,12 +90,12 @@ The soft linen fabric ensures breathability and ease of draping, making it a fav
     { label: "Occasion", value: "Casual, Festive, Daily Wear" },
     { label: "Origin", value: "Kanchipuram, Tamil Nadu" },
   ],
-  returnPolicy: `We accept returns within 7 days of delivery, provided the item is unused, unwashed, and in original packaging with all tags intact.
+  returnPolicy: `All sales are final. No returns, exchanges, or refunds are accepted once an order has been placed.
 
-To initiate a return, contact us at hello@oorvashee.com with your order number. Exchange requests are processed within 5–7 business days of receiving the returned item.`,
-  shippingInfo: `Orders are dispatched within 1–2 business days.\n\nEstimated delivery:\n• Metro cities: 2–4 business days\n• Tier 2 / Tier 3: 4–7 business days\n• International: 10–14 business days\n\nFree shipping on orders above ₹3,000.`,
-  manufacturedBy: `Oorvashee Saree House\nKanchipuram, Tamil Nadu — 631 501\nGSTIN: 22AAAAA0000A1Z5`,
-  customerCare: `Email: hello@oorvashee.com\nPhone / WhatsApp: +91 00000 00000\nMon–Sat, 10 AM – 7 PM IST`,
+Please review the product details, description, and images carefully before ordering. For any questions, contact us on WhatsApp before placing your order.`,
+  shippingInfo: `Orders are dispatched within 1–3 business days.\n\nWe ship across India only — international delivery is not available.\n\nEstimated delivery:\n• Metro cities: 1–2 business days\n• Other locations in India: timelines vary by destination\n\nFree shipping on orders above ₹3,000.`,
+  manufacturedBy: `Oorvashee Saree House (evolved from VR Silks)\nHyderabad, Telangana, India`,
+  customerCare: `WhatsApp: +91 97037 66779\nEmail: hello@oorvashee.com\nMonday to Sunday, 11:00 AM – 8:30 PM IST`,
 };
 
 const _BASE: Omit<Product, "id" | "href"> = {

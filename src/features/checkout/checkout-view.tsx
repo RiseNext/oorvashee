@@ -248,13 +248,9 @@ function CheckoutBody() {
               hint="Card, UPI, NetBanking — secured by Razorpay"
               register={register("paymentMethod")}
             />
-            <PaymentOption
-              value="cod"
-              checked={paymentMethod === "cod"}
-              label="Cash on Delivery"
-              hint="Pay when your order arrives"
-              register={register("paymentMethod")}
-            />
+            <p className="font-body text-xs text-text-muted">
+              Cash on Delivery is not available — we accept online prepaid payments only.
+            </p>
           </div>
         </Section>
 
@@ -343,11 +339,7 @@ function CheckoutBody() {
             )}
           >
             <Lock className="h-4 w-4" />
-            {placing
-              ? "Placing…"
-              : paymentMethod === "cod"
-                ? "Place Order"
-                : "Pay & Place Order"}
+            {placing ? "Placing…" : "Pay & Place Order"}
           </button>
           <p className="mt-3 text-center font-body text-[11px] text-text-muted">
             Secure checkout. Your details are encrypted.

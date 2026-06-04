@@ -38,21 +38,21 @@ function brandContent() {
   const { contact, fullName } = siteConfig;
   return {
     returnPolicy:
-      "We accept returns within 7 days of delivery, provided the item is unused, " +
-      "unwashed, and in its original packaging with all tags intact.\n\n" +
-      `To start a return, email ${contact.email} with your order number. ` +
-      "Exchanges are processed within 5–7 business days of receiving the item.",
+      "All sales are final. No returns, exchanges, or refunds are accepted once an " +
+      "order has been placed.\n\n" +
+      "Please review the product details, description, and images carefully before " +
+      "ordering. For any questions, contact us on WhatsApp before placing your order.",
     shippingInfo:
-      "Orders are dispatched within 1–2 business days.\n\n" +
+      "Orders are dispatched within 1–3 business days.\n\n" +
+      "We ship across India only — international delivery is not available.\n\n" +
       "Estimated delivery:\n" +
-      "• Metro cities: 2–4 business days\n" +
-      "• Tier 2 / Tier 3: 4–7 business days\n" +
-      "• International: 10–14 business days",
+      "• Metro cities: 1–2 business days\n" +
+      "• Other locations in India: timelines vary by destination",
     manufacturedBy: `${fullName}\n${contact.address}`,
     customerCare:
+      `WhatsApp: ${contact.whatsapp}\n` +
       `Email: ${contact.email}\n` +
-      `Phone / WhatsApp: ${contact.phone}\n` +
-      "Mon–Sat, 10 AM – 7 PM IST",
+      contact.supportHours,
   };
 }
 

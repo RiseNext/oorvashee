@@ -8,7 +8,10 @@ import "./globals.css";
 
 const displayFont = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  // 700 dropped — no element renders the display font at bold (every `font-bold`
+  // heading carries `font-body`, so those are DM_Sans). Used display weights are
+  // 400/500/600 only. DM_Sans weights are all in use and unchanged.
+  weight: ["400", "500", "600"],
   variable: "--font-display",
   display: "swap",
 });
