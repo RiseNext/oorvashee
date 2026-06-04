@@ -27,7 +27,7 @@ const priceRanges = [
   {
     label: "Under ₹10,000",
     href: "/collections/under-10000",
-    image: "/images/prize/under-10,000/Untitled - May 25, 2026 at 13.11.45.png",
+    image: "/images/prize/under-10000/under-10000.png",
   },
 ];
 
