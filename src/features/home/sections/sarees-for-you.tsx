@@ -12,22 +12,22 @@ const priceRanges = [
   {
     label: "Under ₹1,000",
     href: "/collections/under-1000",
-    image: "/images/prize/under-1000/Untitled - May 25, 2026 at 13.07.12.png",
+    image: "/images/prize/under-1000/under-1000.avif",
   },
   {
     label: "Under ₹2,000",
     href: "/collections/under-2000",
-    image: "/images/prize/under-2000/Untitled - May 25, 2026 at 13.08.43.png",
+    image: "/images/prize/under-2000/under-2000.avif",
   },
   {
     label: "Under ₹5,000",
     href: "/collections/under-5000",
-    image: "/images/prize/under-5000/Untitled - May 25, 2026 at 13.10.44.png",
+    image: "/images/prize/under-5000/under-5000.avif",
   },
   {
     label: "Under ₹10,000",
     href: "/collections/under-10000",
-    image: "/images/prize/under-10000/under-10000.png",
+    image: "/images/prize/under-10000/under-10000.avif",
   },
 ];
 
