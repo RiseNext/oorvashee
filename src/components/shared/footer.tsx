@@ -108,16 +108,13 @@ export function Footer() {
       {/* Gold hairline accent */}
       <div className="h-px w-full bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
 
-      <div className="mx-auto max-w-screen-xl px-5 py-14 sm:px-6 lg:px-8 lg:py-16">
-        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mx-auto max-w-screen-xl px-5 py-9 sm:px-6 lg:px-8 lg:py-11">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-5">
           {/* Brand */}
           <div className="col-span-2 lg:col-span-2">
-            <p className="font-display text-3xl font-semibold tracking-wide text-gold">{siteConfig.name}</p>
+            <p className="font-display text-2xl font-semibold tracking-wide text-gold">{siteConfig.name}</p>
             <p className="mt-1 font-display text-sm italic text-white/60">{siteConfig.tagline}</p>
-            <p className="mt-4 max-w-sm font-body text-sm leading-relaxed text-white/70">
-              {siteConfig.description}
-            </p>
-            <div className="mt-6 flex items-center gap-3">
+            <div className="mt-4 flex items-center gap-3">
               {SOCIALS.map(({ label, href, Icon }) => (
                 <a
                   key={label}
@@ -136,7 +133,7 @@ export function Footer() {
           {/* Quick links */}
           <nav aria-label="Quick links">
             <h2 className={headingClass}>Explore</h2>
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               {QUICK_LINKS.map((l) => (
                 <li key={l.href}>
                   <Link href={l.href} className={linkClass}>
@@ -150,7 +147,7 @@ export function Footer() {
           {/* Collections */}
           <nav aria-label="Collections">
             <h2 className={headingClass}>Collections</h2>
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               {COLLECTION_LINKS.map((l) => (
                 <li key={l.href}>
                   <Link href={l.href} className={linkClass}>
@@ -164,7 +161,7 @@ export function Footer() {
           {/* Support + contact */}
           <div>
             <h2 className={headingClass}>Help</h2>
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               {SUPPORT_LINKS.map((l) => (
                 <li key={l.href}>
                   <Link href={l.href} className={linkClass}>
@@ -174,7 +171,7 @@ export function Footer() {
               ))}
             </ul>
 
-            <address className="mt-6 space-y-2.5 not-italic">
+            <address className="mt-5 space-y-2 not-italic">
               <a href={`https://wa.me/${waNumber}`} target="_blank" rel="noopener noreferrer" className={`flex items-start gap-2 ${linkClass}`}>
                 <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-gold" strokeWidth={1.6} />
                 {siteConfig.contact.whatsapp}
@@ -188,29 +185,16 @@ export function Footer() {
                 <span>{siteConfig.contact.address}</span>
               </p>
             </address>
-            <p className="mt-3 font-body text-xs text-white/55">
-              WhatsApp support · {siteConfig.contact.supportHours}
-            </p>
-
-            <a
-              href={`https://wa.me/${waNumber}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-5 inline-flex items-center gap-2 rounded-full border border-gold/60 px-4 py-2 font-body text-xs font-medium uppercase tracking-[0.12em] text-gold transition-colors duration-200 hover:bg-gold hover:text-[#54100D]"
-            >
-              <MessageCircle className="h-4 w-4" strokeWidth={1.7} />
-              Chat on WhatsApp
-            </a>
           </div>
         </div>
       </div>
 
       {/* Bottom bar */}
       <div className="border-t border-white/10">
-        <div className="mx-auto max-w-screen-xl px-5 py-5 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-screen-xl px-5 py-4 sm:px-6 lg:px-8">
           <nav
             aria-label="Policies"
-            className="mb-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2"
+            className="mb-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-2"
           >
             {POLICY_LINKS.map((l) => (
               <Link
@@ -222,12 +206,9 @@ export function Footer() {
               </Link>
             ))}
           </nav>
-          <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
-            <p className="font-body text-xs text-white/55">
-              © {new Date().getFullYear()} {siteConfig.fullName}. All rights reserved.
-            </p>
-            <p className="font-display text-xs italic text-white/45">{siteConfig.storyTagline}</p>
-          </div>
+          <p className="text-center font-body text-xs text-white/55">
+            © {new Date().getFullYear()} {siteConfig.fullName}. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

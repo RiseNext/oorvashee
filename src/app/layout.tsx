@@ -4,6 +4,7 @@ import { siteConfig } from "@/config/site";
 import { AppProviders } from "@/providers";
 import { JsonLd, organizationSchema, webSiteSchema } from "@/lib/seo/jsonld";
 import { WebVitals } from "@/components/web-vitals";
+import OorvasheeLoader from "@/components/oorvashee-loader";
 import "./globals.css";
 
 const displayFont = Cormorant_Garamond({
@@ -91,6 +92,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className="min-h-full flex flex-col bg-background text-foreground font-body"
       >
+        <OorvasheeLoader />
         <JsonLd data={[organizationSchema(), webSiteSchema()]} />
         <WebVitals />
         <AppProviders>{children}</AppProviders>
