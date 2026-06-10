@@ -159,12 +159,35 @@ export interface InventoryItem {
   productSlug: string;
   variantLabel: string | null;
   stock: number;
+  /** Derived — SUM of active (reserved + payment_processing) reservations. */
   reserved: number;
   available: number;
+  /** Cumulative units sold (forward-only analytics). */
+  sold: number;
   lowStockThreshold: number;
   isLowStock: boolean;
   isOutOfStock: boolean;
   price: number;
+}
+
+// ---------- Reservations ----------
+export type ReservationBucket = "active" | "expired" | "completed" | "cancelled";
+
+export interface AdminReservation {
+  id: string;
+  checkoutSessionId: string;
+  variantId: string;
+  sku: string;
+  productName: string;
+  userId: string;
+  quantity: number;
+  status: string;
+  bucket: ReservationBucket;
+  /** Active row already past its expiry, awaiting the cron sweep. */
+  isExpired: boolean;
+  expiresAt: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ---------- Categories ----------

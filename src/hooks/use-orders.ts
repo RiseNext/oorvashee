@@ -36,7 +36,12 @@ export function useAccountOrder(orderNumber: string) {
   });
 }
 
-/** Guest order tracking — needs the email that placed the order. */
+/**
+ * Order tracking — also used by the post-payment success page. The Razorpay
+ * webhook is the source of truth, so we POLL until payment is finalised: every
+ * 2.5s while `payment_status === "pending"`, stopping once it's
+ * paid/failed/refunded or after ~20 attempts (~50s) as a safety cap.
+ */
 export function useOrderTracking(orderNumber: string, email: string | null) {
   const { authedFetch } = useApiClient();
   return useQuery({
@@ -44,6 +49,15 @@ export function useOrderTracking(orderNumber: string, email: string | null) {
     queryFn: () => getOrderByNumber(authedFetch, orderNumber, email as string),
     enabled: Boolean(orderNumber) && Boolean(email),
     retry: false,
-    staleTime: 15_000,
+    staleTime: 0,
+    refetchInterval: (query) => {
+      const order = query.state.data;
+      if (!order) return 2500; // first fetch still in flight
+      if (order.paymentStatus === "pending") {
+        // Keep polling for the webhook, but cap total attempts.
+        return query.state.dataUpdateCount >= 20 ? false : 2500;
+      }
+      return false; // paid / failed / refunded / cod_pending — settled
+    },
   });
 }

@@ -64,6 +64,10 @@ export interface BackendVariant {
   size: string | null;
   price: string;
   available: boolean;
+  /** DERIVED available = stock - active reservations (Phase 6). */
+  available_quantity?: number;
+  /** DB-computed: in_stock|low|selling_fast|last_one|reserved|out_of_stock. */
+  availability_state?: string;
   stock?: number | null;
 }
 
@@ -197,6 +201,26 @@ export interface BackendCheckoutQuote {
   total: string;
   currency: string;
   has_unavailable_items: boolean;
+}
+
+/** `CheckoutLineResult`. */
+export interface BackendCheckoutLine {
+  variant_id: string;
+  product_name: string;
+  variant_label: string | null;
+  requested: number;
+  available: number;
+  reserved: boolean;
+  reason: string | null;
+}
+
+/** `CheckoutSessionRead` — the POST /checkout reservation. */
+export interface BackendCheckoutSession {
+  session_id: string;
+  status: string;
+  expires_at: string;
+  expires_in_seconds: number;
+  lines: BackendCheckoutLine[];
 }
 
 /** `RazorpayHandoff`. */

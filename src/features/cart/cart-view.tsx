@@ -178,7 +178,9 @@ function CartRow({
             )}
             {!item.available && (
               <span className="mt-1.5 inline-flex items-center rounded-full bg-badge-bg px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-badge-text">
-                Unavailable
+                {item.maxQuantity > 0
+                  ? `Only ${item.maxQuantity} left — reduce quantity`
+                  : "Out of stock"}
               </span>
             )}
           </div>

@@ -14,6 +14,10 @@ export interface ProductVariant {
   price: Money;
   compareAtPrice?: Money;
   inStock: boolean;
+  /** DERIVED available = stock - active reservations (Phase 6). */
+  availableQuantity?: number;
+  /** DB-computed: in_stock|low|selling_fast|last_one|reserved|out_of_stock. */
+  availabilityState?: string;
   options: Record<string, string>;
 }
 

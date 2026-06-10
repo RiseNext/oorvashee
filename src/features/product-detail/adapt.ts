@@ -86,6 +86,8 @@ export function toProductDetailData(product: Product): ProductDetailData {
       label: axisLabel || v.sku,
       price: v.price || product.price,
       available: v.inStock,
+      availableQuantity: v.availableQuantity,
+      availabilityState: v.availabilityState,
       isDefault: i === 0,
     };
   });

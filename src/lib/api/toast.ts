@@ -14,6 +14,10 @@ const FRIENDLY_BY_CODE: Record<string, string> = {
   forbidden: "You don't have permission to do that.",
   payment_failed: "Payment couldn't be completed. Please try again.",
   idempotency_conflict: "This request was already processed.",
+  reservation_conflict: "Some items are no longer available — please update your bag.",
+  reservation_expired: "Your 3-minute hold expired — refreshing your reservation.",
+  payment_in_progress: "A payment is already in progress for this checkout.",
+  product_unavailable: "This piece is no longer available.",
 };
 
 /**

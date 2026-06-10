@@ -11,11 +11,48 @@ import { toastApiError } from "@/lib/api/toast";
 import { AdminHeading } from "@/features/admin/admin-shell";
 import { AdminCard, AdminEmpty, AdminError, Pagination, StatusBadge, TableSkeleton } from "@/features/admin/ui";
 import { cn } from "@/lib/utils";
-import type { InventoryItem } from "@/types/admin";
+import type { InventoryItem, ReservationBucket } from "@/types/admin";
 
 const input = "w-full rounded-lg border border-border-default bg-white px-3.5 py-2.5 font-body text-sm text-text-primary outline-none transition-colors focus:border-border-focus";
 
+type View = "stock" | "reservations";
+
+const VIEWS: { label: string; value: View }[] = [
+  { label: "Stock", value: "stock" },
+  { label: "Reservations", value: "reservations" },
+];
+
 export default function AdminInventoryPage() {
+  const [view, setView] = useState<View>("stock");
+
+  return (
+    <>
+      <AdminHeading title="Inventory" />
+
+      <div className="mb-5 flex gap-2">
+        {VIEWS.map((v) => (
+          <button
+            key={v.value}
+            type="button"
+            onClick={() => setView(v.value)}
+            className={cn(
+              "rounded-full border px-4 py-1.5 font-body text-xs font-medium transition-colors",
+              view === v.value ? "border-text-primary bg-text-primary text-white" : "border-border-default text-text-secondary hover:border-border-focus",
+            )}
+          >
+            {v.label}
+          </button>
+        ))}
+      </div>
+
+      {view === "stock" ? <StockPanel /> : <ReservationsPanel />}
+    </>
+  );
+}
+
+// ============================ Stock ============================
+
+function StockPanel() {
   const { authedFetch } = useApiClient();
   const [q, setQ] = useState("");
   const [search, setSearch] = useState("");
@@ -32,8 +69,6 @@ export default function AdminInventoryPage() {
 
   return (
     <>
-      <AdminHeading title="Inventory" />
-
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <form
           onSubmit={(e) => {
@@ -80,9 +115,10 @@ export default function AdminInventoryPage() {
                 <tr>
                   <th className="px-4 py-3 font-medium">Product</th>
                   <th className="px-4 py-3 font-medium">SKU</th>
-                  <th className="px-4 py-3 font-medium text-right">Stock</th>
+                  <th className="px-4 py-3 font-medium text-right">Physical</th>
                   <th className="px-4 py-3 font-medium text-right">Reserved</th>
                   <th className="px-4 py-3 font-medium text-right">Available</th>
+                  <th className="px-4 py-3 font-medium text-right">Sold</th>
                   <th className="px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3" />
                 </tr>
@@ -98,6 +134,7 @@ export default function AdminInventoryPage() {
                     <td className="px-4 py-3 text-right tabular-nums text-text-primary">{it.stock}</td>
                     <td className="px-4 py-3 text-right tabular-nums text-text-muted">{it.reserved}</td>
                     <td className="px-4 py-3 text-right tabular-nums font-medium text-text-primary">{it.available}</td>
+                    <td className="px-4 py-3 text-right tabular-nums text-text-muted">{it.sold}</td>
                     <td className="px-4 py-3">
                       {it.isOutOfStock ? (
                         <StatusBadge label="Out of stock" tone="amber" />
@@ -140,6 +177,98 @@ export default function AdminInventoryPage() {
   );
 }
 
+// ============================ Reservations ============================
+
+const BUCKETS: { label: string; value: ReservationBucket; tone: "blue" | "green" | "amber" | "neutral" }[] = [
+  { label: "Active", value: "active", tone: "blue" },
+  { label: "Expired", value: "expired", tone: "amber" },
+  { label: "Completed", value: "completed", tone: "green" },
+  { label: "Cancelled", value: "cancelled", tone: "neutral" },
+];
+
+function ReservationsPanel() {
+  const { authedFetch } = useApiClient();
+  const [bucket, setBucket] = useState<ReservationBucket>("active");
+  const [page, setPage] = useState(1);
+
+  const query = useQuery({
+    queryKey: ["admin-reservations", bucket, page],
+    queryFn: () => admin.listReservations(authedFetch, { bucket, page }),
+    placeholderData: keepPreviousData,
+  });
+  const data = query.data;
+  const tone = BUCKETS.find((b) => b.value === bucket)?.tone ?? "neutral";
+
+  return (
+    <>
+      <div className="mb-5 flex flex-wrap gap-2">
+        {BUCKETS.map((b) => (
+          <button
+            key={b.value}
+            type="button"
+            onClick={() => {
+              setBucket(b.value);
+              setPage(1);
+            }}
+            className={cn(
+              "rounded-full border px-3.5 py-1.5 font-body text-xs font-medium transition-colors",
+              bucket === b.value ? "border-cta-fill bg-cta-fill text-white" : "border-border-default text-text-secondary hover:border-border-focus",
+            )}
+          >
+            {b.label}
+          </button>
+        ))}
+      </div>
+
+      {query.isLoading ? (
+        <TableSkeleton />
+      ) : query.isError ? (
+        <AdminError onRetry={() => query.refetch()} />
+      ) : !data || data.items.length === 0 ? (
+        <AdminEmpty title="No reservations" body={`No ${bucket} reservations right now.`} />
+      ) : (
+        <AdminCard className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left font-body text-sm">
+              <thead className="border-b border-border-light text-[11px] uppercase tracking-[0.1em] text-text-muted">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Product</th>
+                  <th className="px-4 py-3 font-medium">SKU</th>
+                  <th className="px-4 py-3 font-medium text-right">Qty</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Expires</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border-light">
+                {data.items.map((r) => (
+                  <tr key={r.id} className="transition-colors hover:bg-bg-secondary/40">
+                    <td className="px-4 py-3 font-medium text-text-primary">{r.productName || "—"}</td>
+                    <td className="px-4 py-3 text-text-secondary">{r.sku || "—"}</td>
+                    <td className="px-4 py-3 text-right tabular-nums text-text-primary">{r.quantity}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <StatusBadge label={r.status.replace(/_/g, " ")} tone={tone} />
+                        {r.isExpired && <StatusBadge label="expiring" tone="amber" />}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-text-muted tabular-nums">
+                      {r.expiresAt ? new Date(r.expiresAt).toLocaleString() : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </AdminCard>
+      )}
+
+      <Pagination page={page} totalPages={data?.totalPages ?? 1} onPage={setPage} />
+    </>
+  );
+}
+
+// ============================ Adjust dialog ============================
+
 function AdjustDialog({ item, onClose, onSaved }: { item: InventoryItem; onClose: () => void; onSaved: () => void }) {
   const { authedFetch } = useApiClient();
   const qc = useQueryClient();
@@ -180,7 +309,7 @@ function AdjustDialog({ item, onClose, onSaved }: { item: InventoryItem; onClose
           {item.productName} · {item.sku}
         </p>
         <p className="mt-1 font-body text-xs text-text-muted">
-          Current: <span className="text-text-secondary">{item.stock} on hand</span> · {item.reserved} reserved · {item.available} available
+          Current: <span className="text-text-secondary">{item.stock} on hand</span> · {item.reserved} reserved · {item.available} available · {item.sold} sold
         </p>
 
         <div className="mt-5 space-y-4">
