@@ -15,12 +15,14 @@ import type {
   AdminOrderListItem,
   AdminProduct,
   AdminProductListItem,
+  AdminReservation,
   AdminVariant,
   AnalyticsOverview,
   FulfillmentKPI,
   InventoryItem,
   OrderStatusSummary,
   ProductStatus,
+  ReservationBucket,
   TopProductRow,
 } from "@/types/admin";
 
@@ -553,11 +555,62 @@ function mapInventoryItem(d: Dict): InventoryItem {
     stock: Number(d.stock ?? 0),
     reserved: Number(d.reserved ?? 0),
     available: Number(d.available ?? 0),
+    sold: Number(d.sold ?? 0),
     lowStockThreshold: Number(d.low_stock_threshold ?? 0),
     isLowStock: Boolean(d.is_low_stock),
     isOutOfStock: Boolean(d.is_out_of_stock),
     price: n(d.price as string),
   };
+}
+
+// ---------- Reservations (Active / Expired / Completed / Cancelled) ----------
+
+const STATUSES_BY_BUCKET: Record<ReservationBucket, string[]> = {
+  active: ["reserved", "payment_processing"],
+  expired: ["expired"],
+  completed: ["completed"],
+  cancelled: ["cancelled"],
+};
+
+function mapReservation(d: Dict): AdminReservation {
+  return {
+    id: s(d.id),
+    checkoutSessionId: s(d.checkout_session_id),
+    variantId: s(d.variant_id),
+    sku: s(d.sku),
+    productName: s(d.product_name),
+    userId: s(d.user_id),
+    quantity: Number(d.quantity ?? 0),
+    status: s(d.status),
+    bucket: s(d.bucket) as ReservationBucket,
+    isExpired: Boolean(d.is_expired),
+    expiresAt: s(d.expires_at),
+    createdAt: s(d.created_at),
+    updatedAt: s(d.updated_at),
+  };
+}
+
+export interface ReservationListParams {
+  bucket: ReservationBucket;
+  variantId?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export function listReservations(
+  af: AuthedFetch,
+  params: ReservationListParams,
+): Promise<Paginated<AdminReservation>> {
+  const page = params.page ?? 1;
+  const pageSize = params.pageSize ?? 20;
+  return af<BackendPage<Dict>>("/admin/inventory/reservations", {
+    query: {
+      status: STATUSES_BY_BUCKET[params.bucket],
+      variant_id: params.variantId,
+      page,
+      page_size: pageSize,
+    },
+  }).then((p) => mapPage(p, mapReservation, { page, pageSize }));
 }
 
 export interface InventoryListParams {
@@ -599,6 +652,7 @@ export function adjustStock(
     stock: Number(d.stock_after ?? 0),
     reserved: Number(d.reserved ?? 0),
     available: Math.max(0, Number(d.stock_after ?? 0) - Number(d.reserved ?? 0)),
+    sold: 0,
     lowStockThreshold: 0,
     isLowStock: false,
     isOutOfStock: Number(d.stock_after ?? 0) === 0,

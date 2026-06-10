@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useForm, type UseFormRegisterReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { AlertCircle, Lock, ShoppingBag } from "lucide-react";
+import { AlertCircle, Clock, Lock, ShoppingBag } from "lucide-react";
 
 import { Navbar } from "@/features/navbar";
 import { PageHeader } from "@/components/shared/page-header";
@@ -80,7 +80,21 @@ export function CheckoutView() {
 function CheckoutBody() {
   const { cart } = useCart();
   const { email, fullName } = useAuthSession();
-  const { quote, quoteLoading, coupon, setCoupon, placing, submit } = useCheckout();
+  const {
+    quote,
+    quoteLoading,
+    coupon,
+    setCoupon,
+    placing,
+    submit,
+    reservation,
+    reservationLoading,
+    blocked,
+    unavailableLines,
+    secondsLeft,
+    expired,
+    refreshReservation,
+  } = useCheckout();
 
   const savedAddresses = useAddressStore((s) => s.addresses);
   const addAddress = useAddressStore((s) => s.add);
@@ -141,8 +155,6 @@ function CheckoutBody() {
   // it just skips compiler memoization for this form component).
   // eslint-disable-next-line react-hooks/incompatible-library
   const paymentMethod = watch("paymentMethod");
-
-  const blocked = Boolean(quote?.hasUnavailableItems);
 
   function onSubmit(v: FormValues) {
     if (saveAddress) {
@@ -270,6 +282,14 @@ function CheckoutBody() {
             Order Summary
           </h2>
 
+          <ReservationTimer
+            loading={reservationLoading}
+            reserved={Boolean(reservation)}
+            secondsLeft={secondsLeft}
+            expired={expired}
+            onRefresh={refreshReservation}
+          />
+
           <ul role="list" className="mt-4 max-h-72 space-y-3 overflow-y-auto">
             {cart.items.map((item) => (
               <li key={item.id} className="flex gap-3">
@@ -318,19 +338,34 @@ function CheckoutBody() {
             </div>
           </dl>
 
-          {blocked && (
+          {unavailableLines.length > 0 && (
             <div className="mt-4 flex items-start gap-2 rounded-lg border border-badge-bg bg-badge-bg/30 px-3 py-2.5">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-badge-text" />
-              <p className="font-body text-xs text-badge-text">
-                Some items are no longer available. Update your{" "}
-                <Link href="/cart" className="underline">bag</Link> to continue.
-              </p>
+              <div className="font-body text-xs text-badge-text">
+                <p className="font-semibold">Some items are no longer available:</p>
+                <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                  {unavailableLines.map((l) => (
+                    <li key={l.variantId}>
+                      {l.productName}
+                      {l.variantLabel ? ` (${l.variantLabel})` : ""} —{" "}
+                      {l.reason === "unavailable"
+                        ? "no longer sold"
+                        : l.available > 0
+                          ? `only ${l.available} available`
+                          : "out of stock"}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-1.5">
+                  Update your <Link href="/cart" className="underline">bag</Link> to continue.
+                </p>
+              </div>
             </div>
           )}
 
           <button
             type="submit"
-            disabled={placing || blocked || quoteLoading}
+            disabled={placing || blocked || expired || quoteLoading || reservationLoading || !reservation}
             className={cn(
               "mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-text-primary py-3.5",
               "font-body text-sm font-semibold uppercase tracking-[0.1em] text-white transition-colors",
@@ -339,7 +374,7 @@ function CheckoutBody() {
             )}
           >
             <Lock className="h-4 w-4" />
-            {placing ? "Placing…" : "Pay & Place Order"}
+            {placing ? "Placing…" : expired ? "Reservation expired" : "Pay & Place Order"}
           </button>
           <p className="mt-3 text-center font-body text-[11px] text-text-muted">
             Secure checkout. Your details are encrypted.
@@ -350,6 +385,52 @@ function CheckoutBody() {
         <PolicyAccordion className="mt-6" />
       </aside>
     </form>
+  );
+}
+
+function ReservationTimer({
+  loading,
+  reserved,
+  secondsLeft,
+  expired,
+  onRefresh,
+}: {
+  loading: boolean;
+  reserved: boolean;
+  secondsLeft: number;
+  expired: boolean;
+  onRefresh: () => void;
+}) {
+  if (loading && !reserved) {
+    return <p className="mt-3 font-body text-xs text-text-muted">Reserving your items…</p>;
+  }
+  if (!reserved) return null;
+  if (expired) {
+    return (
+      <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-badge-bg bg-badge-bg/30 px-3 py-2">
+        <span className="font-body text-xs text-badge-text">Your 3-minute hold expired.</span>
+        <button
+          type="button"
+          onClick={onRefresh}
+          className="font-body text-xs font-semibold text-cta-fill underline"
+        >
+          Refresh
+        </button>
+      </div>
+    );
+  }
+  const mm = Math.floor(secondsLeft / 60);
+  const ss = secondsLeft % 60;
+  return (
+    <div className="mt-3 flex items-center gap-2 rounded-lg bg-bg-secondary px-3 py-2">
+      <Clock className="h-3.5 w-3.5 text-cta-fill" />
+      <span className="font-body text-xs text-text-secondary">
+        Items reserved for{" "}
+        <span className="font-semibold tabular-nums text-text-primary">
+          {mm}:{String(ss).padStart(2, "0")}
+        </span>
+      </span>
+    </div>
   );
 }
 

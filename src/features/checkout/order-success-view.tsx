@@ -27,6 +27,10 @@ export function OrderSuccessView() {
   const email = params.get("email");
   const { isSignedIn } = useAuthSession();
   const { data: order, isLoading, isError } = useOrderTracking(orderNumber, email);
+  const paymentStatus = order?.paymentStatus;
+  // While the order exists but the webhook hasn't confirmed payment yet.
+  const confirming = Boolean(order) && paymentStatus === "pending";
+  const failed = paymentStatus === "failed";
 
   return (
     <>
@@ -38,12 +42,20 @@ export function OrderSuccessView() {
           </span>
           <h1
             className="font-display font-semibold uppercase"
-            style={{ color: "var(--gold)", fontSize: "clamp(1.8rem,4.5vw,3rem)", letterSpacing: "0.1em" }}
+            style={{
+              color: failed ? "var(--cta-fill)" : "var(--gold)",
+              fontSize: "clamp(1.8rem,4.5vw,3rem)",
+              letterSpacing: "0.1em",
+            }}
           >
-            Thank You
+            {failed ? "Payment Issue" : confirming ? "Confirming Payment" : "Thank You"}
           </h1>
           <p className="mt-3 font-display italic text-sm sm:text-base text-text-muted">
-            Your order has been placed
+            {failed
+              ? "We couldn't confirm your payment yet"
+              : confirming
+                ? "Hang tight — we're confirming your payment"
+                : "Your order has been placed"}
           </p>
           {orderNumber && (
             <p className="mt-1 font-body text-xs uppercase tracking-[0.18em] text-text-secondary">
@@ -53,6 +65,22 @@ export function OrderSuccessView() {
         </div>
 
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+          {confirming && (
+            <div className="mb-6 flex items-center justify-center gap-3 rounded-xl border border-border-light bg-bg-card px-4 py-3">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-cta-fill/30 border-t-cta-fill" />
+              <p className="font-body text-sm text-text-secondary">
+                Confirming your payment with the bank — this can take a few seconds.
+              </p>
+            </div>
+          )}
+          {failed && (
+            <div className="mb-6 rounded-xl border border-badge-bg bg-badge-bg/30 px-4 py-3 text-center">
+              <p className="font-body text-sm text-badge-text">
+                Your payment didn&apos;t go through and no charge was made. You can retry from{" "}
+                <Link href="/account/orders" className="underline">My Orders</Link>.
+              </p>
+            </div>
+          )}
           {isLoading ? (
             <div className="flex justify-center py-16">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-cta-fill/30 border-t-cta-fill" />

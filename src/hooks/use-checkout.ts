@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useRazorpay, type RazorpayOrderOptions } from "react-razorpay";
@@ -8,15 +8,14 @@ import { toast } from "sonner";
 
 import { useApiClient } from "@/hooks/use-api-client";
 import { useCart } from "@/hooks/use-cart";
-import { newIdempotencyKey } from "@/lib/api/idempotency";
+import { ApiError } from "@/lib/api/errors";
 import { toastApiError } from "@/lib/api/toast";
-import {
-  placeOrder,
-  requestQuote,
-  verifyPayment,
-  type PlaceOrderParams,
-} from "@/lib/api/checkout";
-import type { CheckoutCustomerInput, PlacedOrder } from "@/types/checkout";
+import { requestQuote, startCheckout, startPayment } from "@/lib/api/checkout";
+import type {
+  CheckoutCustomerInput,
+  CheckoutLine,
+  PlacedOrder,
+} from "@/types/checkout";
 
 const BRAND = "Oorvashee Saree House";
 const BRAND_COLOR = "#7B0D0D";
@@ -31,8 +30,24 @@ export interface CheckoutSubmitValues {
   state: string;
   postalCode: string;
   country: string;
-  paymentMethod: PlaceOrderParams["paymentMethod"];
+  paymentMethod: "razorpay" | "cod";
   notes?: string;
+}
+
+/** Extract the per-line breakdown a 409 reservation_conflict carries in meta. */
+function linesFromError(error: unknown): CheckoutLine[] {
+  if (!(error instanceof ApiError)) return [];
+  const meta = (error.details as { meta?: { lines?: unknown[] } } | undefined)?.meta;
+  if (!Array.isArray(meta?.lines)) return [];
+  return (meta!.lines as Record<string, unknown>[]).map((l) => ({
+    variantId: String(l.variant_id),
+    productName: String(l.product_name ?? "Item"),
+    variantLabel: l.variant_label ? String(l.variant_label) : undefined,
+    requested: Number(l.requested ?? 0),
+    available: Number(l.available ?? 0),
+    reserved: Boolean(l.reserved),
+    reason: l.reason ? String(l.reason) : undefined,
+  }));
 }
 
 export function useCheckout() {
@@ -50,12 +65,47 @@ export function useCheckout() {
   );
   const itemsKey = items.map((i) => `${i.variantId}:${i.quantity}`).join(",");
 
+  // Totals (unchanged) — server-authoritative pricing.
   const quoteQuery = useQuery({
     queryKey: ["checkout-quote", itemsKey, coupon ?? ""],
     queryFn: () => requestQuote(authedFetch, { items, couponCode: coupon }),
     enabled: items.length > 0,
     staleTime: 15_000,
   });
+
+  // Reservation — POST /checkout the moment the user reaches checkout. Holds
+  // stock for ~3 minutes. A 409 (reservation_conflict) is a real "unavailable",
+  // never a transient error, so we don't retry it.
+  const reservationQuery = useQuery({
+    queryKey: ["checkout-reserve", itemsKey],
+    queryFn: () => startCheckout(authedFetch),
+    enabled: items.length > 0,
+    retry: false,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+  });
+  const reservation = reservationQuery.data;
+
+  // Which lines could NOT be held — from the 409 breakdown, or (defensively)
+  // any success line flagged reserved=false.
+  const unavailableLines = useMemo<CheckoutLine[]>(() => {
+    if (reservationQuery.isError) return linesFromError(reservationQuery.error);
+    return (reservation?.lines ?? []).filter((l) => !l.reserved);
+  }, [reservationQuery.isError, reservationQuery.error, reservation]);
+
+  // Visible 3-minute countdown. `secondsLeft` is DERIVED from a once-a-second
+  // clock tick, so we never call setState synchronously inside an effect.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const secondsLeft = reservation
+    ? Math.max(0, Math.round((new Date(reservation.expiresAt).getTime() - now) / 1000))
+    : 0;
+
+  const expired = Boolean(reservation) && secondsLeft <= 0;
+  const blocked = reservationQuery.isError || unavailableLines.length > 0;
 
   function finishSuccess(orderNumber: string, email: string) {
     clear();
@@ -83,23 +133,10 @@ export function useCheckout() {
         contact: customer.phone,
       },
       theme: { color: BRAND_COLOR },
-      handler: async (resp) => {
-        try {
-          await verifyPayment(
-            authedFetch,
-            {
-              orderNumber: placed.orderNumber,
-              razorpayOrderId: resp.razorpay_order_id,
-              razorpayPaymentId: resp.razorpay_payment_id,
-              razorpaySignature: resp.razorpay_signature,
-            },
-            newIdempotencyKey(),
-          );
-        } catch {
-          // The Razorpay WEBHOOK is the backend's source of truth — even if
-          // this client verify fails, the order finalises server-side. The
-          // success page re-fetches the order, so we proceed regardless.
-        }
+      handler: () => {
+        // The Razorpay WEBHOOK is the SOLE source of truth — we do NOT verify
+        // or finalise on the client. The success page polls the order status
+        // until the webhook marks it paid.
         finishSuccess(placed.orderNumber, customer.email);
       },
       modal: {
@@ -121,6 +158,12 @@ export function useCheckout() {
 
   async function submit(values: CheckoutSubmitValues) {
     if (items.length === 0 || placing) return;
+    const sessionId = reservation?.sessionId;
+    if (!sessionId || expired) {
+      toast.error("Your 3-minute hold expired — refreshing your reservation.");
+      reservationQuery.refetch();
+      return;
+    }
     setPlacing(true);
     const customer: CheckoutCustomerInput = {
       email: values.email,
@@ -128,29 +171,21 @@ export function useCheckout() {
       fullName: values.fullName,
     };
     try {
-      const placed = await placeOrder(
-        authedFetch,
-        {
-          items,
-          customer,
-          shippingAddress: {
-            recipientName: values.fullName,
-            phone: values.phone,
-            line1: values.line1,
-            line2: values.line2,
-            city: values.city,
-            state: values.state,
-            postalCode: values.postalCode,
-            country: values.country || "IN",
-          },
-          paymentMethod: values.paymentMethod,
-          couponCode: coupon,
-          notes: values.notes,
+      const placed = await startPayment(authedFetch, sessionId, {
+        customer,
+        shippingAddress: {
+          recipientName: values.fullName,
+          phone: values.phone,
+          line1: values.line1,
+          line2: values.line2,
+          city: values.city,
+          state: values.state,
+          postalCode: values.postalCode,
+          country: values.country || "IN",
         },
-        newIdempotencyKey(),
-      );
-
-      if (values.paymentMethod === "cod" || !placed.payment) {
+        notes: values.notes,
+      });
+      if (!placed.payment) {
         finishSuccess(placed.orderNumber, customer.email);
         return;
       }
@@ -158,6 +193,10 @@ export function useCheckout() {
     } catch (error) {
       toastApiError(error);
       setPlacing(false);
+      // Expired/conflicting hold → refresh the reservation so they can retry.
+      if (error instanceof ApiError && error.status === 409) {
+        reservationQuery.refetch();
+      }
     }
   }
 
@@ -166,6 +205,14 @@ export function useCheckout() {
     quoteLoading: quoteQuery.isLoading,
     quoteError: quoteQuery.isError,
     refetchQuote: quoteQuery.refetch,
+    // Reservation surface
+    reservation,
+    reservationLoading: reservationQuery.isLoading,
+    blocked,
+    unavailableLines,
+    secondsLeft,
+    expired,
+    refreshReservation: () => reservationQuery.refetch(),
     coupon,
     setCoupon,
     placing,

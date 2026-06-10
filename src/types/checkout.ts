@@ -41,6 +41,29 @@ export interface CheckoutQuote {
   hasUnavailableItems: boolean;
 }
 
+/** One line of an atomic cart-level reservation (POST /checkout). */
+export interface CheckoutLine {
+  variantId: string;
+  productName: string;
+  variantLabel?: string;
+  requested: number;
+  /** Units available to THIS user at reservation time (stock − other holds). */
+  available: number;
+  /** True when this line was (or remains) reserved by this session. */
+  reserved: boolean;
+  /** Populated on failure: 'out_of_stock' | 'unavailable'. */
+  reason?: string;
+}
+
+/** Active reservation for the user's cart (POST /checkout response). */
+export interface CheckoutReservation {
+  sessionId: string;
+  status: string;
+  expiresAt: string;
+  expiresInSeconds: number;
+  lines: CheckoutLine[];
+}
+
 export interface RazorpayHandoff {
   razorpayOrderId: string;
   razorpayKeyId: string;

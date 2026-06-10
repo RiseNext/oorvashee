@@ -76,6 +76,8 @@ export function mapVariant(dto: BackendVariant): ProductVariant {
     title: label,
     price: toNumber(dto.price),
     inStock: dto.available,
+    availableQuantity: dto.available_quantity,
+    availabilityState: dto.availability_state,
     options,
   };
 }

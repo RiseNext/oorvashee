@@ -66,6 +66,43 @@ function PillBtn({
   );
 }
 
+/* ── Availability messaging (DB-driven, Phase 6) ── */
+const AVAILABILITY_TONE: Record<string, string> = {
+  low: "text-badge-text",
+  selling_fast: "text-cta-fill",
+  last_one: "text-cta-fill",
+  reserved: "text-text-muted",
+  out_of_stock: "text-text-muted",
+};
+
+function availabilityMessage(state?: string, qty?: number): string | null {
+  switch (state) {
+    case "low":
+      return "Only a few pieces left";
+    case "selling_fast":
+      return `Selling fast — only ${qty ?? 0} left`;
+    case "last_one":
+      return "Last piece available";
+    case "reserved":
+      return "Reserved by another customer. May become available shortly.";
+    case "out_of_stock":
+      return "Out of Stock";
+    default:
+      return null; // in_stock / undefined → no message
+  }
+}
+
+function AvailabilityNote({ variant }: { variant?: { availabilityState?: string; availableQuantity?: number } }) {
+  if (!variant) return null;
+  const note = availabilityMessage(variant.availabilityState, variant.availableQuantity);
+  if (!note) return null;
+  return (
+    <p className={cn("font-body text-sm font-medium", AVAILABILITY_TONE[variant.availabilityState ?? ""] ?? "text-text-muted")}>
+      {note}
+    </p>
+  );
+}
+
 /* ── Props ── */
 export interface BuyZoneProps {
   product: ProductDetailData;
@@ -77,6 +114,9 @@ export interface BuyZoneProps {
   /** Called when the user picks a variant from the flat fallback picker. */
   onVariantChange?: (id: string) => void;
   quantity: number;
+  /** Max selectable units = backend-derived available_quantity for the
+   * resolved variant. Undefined → no client limit (legacy/mock). */
+  maxQuantity?: number;
   onSizeChange: (s: string) => void;
   onColorChange: (i: number) => void;
   onFabricChange: (f: string) => void;
@@ -96,6 +136,7 @@ export function BuyZone({
   currentVariantId,
   onVariantChange,
   quantity,
+  maxQuantity,
   onSizeChange,
   onColorChange,
   onFabricChange,
@@ -106,6 +147,13 @@ export function BuyZone({
   canBuy = true,
   outOfStock = false,
 }: BuyZoneProps) {
+  // Clamp the stepper to the backend-derived available_quantity. Undefined ⇒
+  // no client limit (legacy/mock). The backend remains the source of truth;
+  // these limits are UX only.
+  const maxQty = typeof maxQuantity === "number" ? maxQuantity : Infinity;
+  const qtyControlsDisabled = outOfStock || maxQty <= 0;
+  const atMin = quantity <= 1;
+  const atMax = quantity >= maxQty;
   // Resolve the currently active variant from the structured list; falls back
   // to undefined when the product has no variants (legacy products).
   const currentVariant = currentVariantId
@@ -225,6 +273,7 @@ export function BuyZone({
         <p className="mt-1 font-body text-xs text-text-muted">
           Inclusive of all taxes. Free shipping over {formatPrice(siteConfig.freeShippingThreshold)}.
         </p>
+        <AvailabilityNote variant={currentVariant} />
       </div>
 
       <div className="h-px bg-border-light" />
@@ -353,7 +402,8 @@ export function BuyZone({
             type="button"
             aria-label="Decrease quantity"
             onClick={() => onQuantityChange(Math.max(1, quantity - 1))}
-            className="flex h-10 w-10 items-center justify-center text-lg text-text-secondary transition-colors hover:bg-bg-secondary hover:text-text-primary"
+            disabled={qtyControlsDisabled || atMin}
+            className="flex h-10 w-10 items-center justify-center text-lg text-text-secondary transition-colors hover:bg-bg-secondary hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-40"
           >
             −
           </button>
@@ -363,12 +413,18 @@ export function BuyZone({
           <button
             type="button"
             aria-label="Increase quantity"
-            onClick={() => onQuantityChange(quantity + 1)}
-            className="flex h-10 w-10 items-center justify-center text-lg text-text-secondary transition-colors hover:bg-bg-secondary hover:text-text-primary"
+            onClick={() => onQuantityChange(Math.min(maxQty, quantity + 1))}
+            disabled={qtyControlsDisabled || atMax}
+            className="flex h-10 w-10 items-center justify-center text-lg text-text-secondary transition-colors hover:bg-bg-secondary hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-40"
           >
             +
           </button>
         </div>
+        {Number.isFinite(maxQty) && maxQty > 0 && atMax && (
+          <p className="mt-1.5 font-body text-xs text-text-muted">
+            Maximum available quantity selected.
+          </p>
+        )}
       </div>
 
       {/* CTA buttons */}

@@ -106,8 +106,17 @@ export function ProductDetailPage({
     }
     return resolveVariant(variants, product.colors, selectedColor, selectedFabric, selectedSize);
   })();
-  const outOfStock = variant ? variant.inStock === false : false;
+  const outOfStock = variant
+    ? variant.inStock === false || variant.availableQuantity === 0
+    : false;
   const canBuy = Boolean(variant) && !outOfStock;
+
+  // Clamp the quantity stepper to the resolved variant's backend-derived
+  // available_quantity (UX only — backend re-validates under lock at checkout).
+  // Undefined ⇒ legacy/mock, no client limit.
+  const availableQty = variant?.availableQuantity;
+  const maxQty = typeof availableQty === "number" ? availableQty : Infinity;
+  const qty = maxQty > 0 ? Math.min(Math.max(quantity, 1), maxQty) : 1;
 
   // Axis-change wrappers clear the manual pick so axis selection takes over.
   function handleSizeChange(s: string) {
@@ -138,7 +147,7 @@ export function ProductDetailPage({
         variantLabel: variant.title,
         image: { url: product.images[0] ?? PLACEHOLDER_IMAGE, alt: product.name },
         unitPrice: variant.price || product.price,
-        quantity,
+        quantity: qty,
       });
       if (buyNow) requireAuth("/checkout");
     } finally {
@@ -211,7 +220,8 @@ export function ProductDetailPage({
                 selectedFabric={selectedFabric}
                 currentVariantId={variant?.id ?? null}
                 onVariantChange={setSelectedVariantId}
-                quantity={quantity}
+                quantity={qty}
+                maxQuantity={availableQty}
                 onSizeChange={handleSizeChange}
                 onColorChange={handleColorChange}
                 onFabricChange={handleFabricChange}

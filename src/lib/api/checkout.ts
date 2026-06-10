@@ -6,6 +6,7 @@
  */
 import type {
   BackendCheckoutQuote,
+  BackendCheckoutSession,
   BackendOrder,
   BackendPlaceOrder,
 } from "@/types/api";
@@ -13,11 +14,17 @@ import type {
   CheckoutAddressInput,
   CheckoutCustomerInput,
   CheckoutQuote,
+  CheckoutReservation,
   PlacedOrder,
 } from "@/types/checkout";
 import type { Order, PaymentMethod } from "@/types/order";
 import type { AuthedFetch } from "./client";
-import { mapOrder, mapPlacedOrder, mapQuote } from "./mappers/order";
+import {
+  mapCheckoutSession,
+  mapOrder,
+  mapPlacedOrder,
+  mapQuote,
+} from "./mappers/order";
 
 export interface QuoteLineInput {
   variantId: string;
@@ -59,6 +66,52 @@ export function requestQuote(
       coupon_code: params.couponCode || undefined,
     },
   }).then(mapQuote);
+}
+
+/**
+ * POST /checkout — atomic, cart-level reservation. Reads the user's SERVER
+ * cart (authed only), row-locks every variant, and holds available stock for
+ * ~3 minutes. A 409 (reservation_conflict) carries the per-line breakdown in
+ * `error.meta.lines`. Idempotent: re-calling refreshes the same session.
+ */
+export function startCheckout(af: AuthedFetch): Promise<CheckoutReservation> {
+  return af<BackendCheckoutSession>("/checkout", { method: "POST" }).then(
+    mapCheckoutSession,
+  );
+}
+
+export interface StartPaymentParams {
+  customer: CheckoutCustomerInput;
+  shippingAddress: CheckoutAddressInput;
+  billingAddress?: CheckoutAddressInput;
+  notes?: string;
+}
+
+/**
+ * POST /checkout/{sessionId}/pay — transitions the reservation to
+ * PAYMENT_PROCESSING (15-min backstop), creates the PENDING order, and returns
+ * the Razorpay handoff. The webhook is the source of truth for completion.
+ */
+export function startPayment(
+  af: AuthedFetch,
+  sessionId: string,
+  params: StartPaymentParams,
+): Promise<PlacedOrder> {
+  return af<BackendPlaceOrder>(`/checkout/${sessionId}/pay`, {
+    method: "POST",
+    body: {
+      customer: {
+        email: params.customer.email,
+        phone: params.customer.phone,
+        full_name: params.customer.fullName,
+      },
+      shipping_address: toWireAddress(params.shippingAddress),
+      billing_address: params.billingAddress
+        ? toWireAddress(params.billingAddress)
+        : undefined,
+      notes: params.notes || undefined,
+    },
+  }).then(mapPlacedOrder);
 }
 
 export interface PlaceOrderParams {

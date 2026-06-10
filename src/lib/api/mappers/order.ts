@@ -4,12 +4,17 @@
  */
 import type {
   BackendCheckoutQuote,
+  BackendCheckoutSession,
   BackendOrder,
   BackendOrderAddress,
   BackendOrderItem,
   BackendPlaceOrder,
 } from "@/types/api";
-import type { CheckoutQuote, PlacedOrder } from "@/types/checkout";
+import type {
+  CheckoutQuote,
+  CheckoutReservation,
+  PlacedOrder,
+} from "@/types/checkout";
 import type {
   Order,
   OrderAddress,
@@ -40,6 +45,26 @@ export function mapQuote(dto: BackendCheckoutQuote): CheckoutQuote {
     total: toNumber(dto.total),
     currency: dto.currency,
     hasUnavailableItems: dto.has_unavailable_items,
+  };
+}
+
+export function mapCheckoutSession(
+  dto: BackendCheckoutSession,
+): CheckoutReservation {
+  return {
+    sessionId: dto.session_id,
+    status: dto.status,
+    expiresAt: dto.expires_at,
+    expiresInSeconds: dto.expires_in_seconds,
+    lines: dto.lines.map((l) => ({
+      variantId: l.variant_id,
+      productName: l.product_name,
+      variantLabel: l.variant_label ?? undefined,
+      requested: l.requested,
+      available: l.available,
+      reserved: l.reserved,
+      reason: l.reason ?? undefined,
+    })),
   };
 }
 
