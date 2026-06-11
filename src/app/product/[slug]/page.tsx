@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ProductDetailPage } from "@/features/product-detail/product-detail-page";
-import { ProductUnavailable } from "@/features/product-detail/product-unavailable";
 import { toProductDetailData } from "@/features/product-detail/adapt";
 import { getProductBySlug, getRelatedProducts } from "@/lib/api/products";
 import { primaryDepartment, toCardProducts } from "@/lib/catalog/presenters";
@@ -57,14 +56,13 @@ export default async function ProductPage({
 }) {
   const { slug } = await params;
 
-  // 404 (unknown slug) → null → notFound(). Archived (available=false) returns
-  // 200 and is rendered with the "unavailable" treatment, never a 404.
+  // 404 (unknown slug) → null → notFound(). A 200 with available=false
+  // (out of stock / reserved by another customer / archived) still renders the
+  // FULL product page — the BuyZone shows the availability state and disables
+  // Add to Cart / Buy Now. We never replace the page with a bare "unavailable"
+  // screen, so a momentarily-held product stays fully browsable.
   const product = await loadProduct(slug);
   if (!product) notFound();
-
-  if (!product.available) {
-    return <ProductUnavailable name={product.title} />;
-  }
 
   // Breadcrumb / "view all" → the product's primary department. Slugs are
   // canonical, so we link the real category page directly.

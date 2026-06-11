@@ -114,6 +114,18 @@ export function startPayment(
   }).then(mapPlacedOrder);
 }
 
+/**
+ * POST /checkout/{sessionId}/cancel — release the hold immediately when the
+ * customer dismisses or fails the Razorpay widget. Frees the reserved stock
+ * for others and cancels the unpaid order. 204 No Content; idempotent.
+ */
+export function cancelCheckout(
+  af: AuthedFetch,
+  sessionId: string,
+): Promise<void> {
+  return af<void>(`/checkout/${sessionId}/cancel`, { method: "POST" });
+}
+
 export interface PlaceOrderParams {
   items: QuoteLineInput[];
   customer: CheckoutCustomerInput;

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useApiClient } from "@/hooks/use-api-client";
 import { useAuthSession } from "@/lib/auth/use-auth-session";
 import { CLERK_ENABLED } from "@/lib/auth/config";
+import { ApiError } from "@/lib/api/errors";
 import { toastApiError } from "@/lib/api/toast";
 import * as cartApi from "@/lib/api/cart";
 import { useCartStore } from "@/store/cart-store";
@@ -135,6 +136,13 @@ export function useCart() {
       return { prev };
     },
     onError: (e, _v, ctx) => {
+      // A 404 means the line is already gone server-side (stale id / double
+      // fire). Keep it removed and reconcile from the server — reverting would
+      // make a deleted line reappear and force the user to retry several times.
+      if (e instanceof ApiError && e.status === 404) {
+        qc.invalidateQueries({ queryKey: CART_QUERY_KEY });
+        return;
+      }
       if (ctx?.prev) setServerCart(ctx.prev);
       toastApiError(e);
     },

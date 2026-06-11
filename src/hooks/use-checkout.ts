@@ -10,7 +10,12 @@ import { useApiClient } from "@/hooks/use-api-client";
 import { useCart } from "@/hooks/use-cart";
 import { ApiError } from "@/lib/api/errors";
 import { toastApiError } from "@/lib/api/toast";
-import { requestQuote, startCheckout, startPayment } from "@/lib/api/checkout";
+import {
+  cancelCheckout,
+  requestQuote,
+  startCheckout,
+  startPayment,
+} from "@/lib/api/checkout";
 import type {
   CheckoutCustomerInput,
   CheckoutLine,
@@ -114,12 +119,21 @@ export function useCheckout() {
     );
   }
 
-  function openRazorpay(placed: PlacedOrder, customer: CheckoutCustomerInput) {
+  function openRazorpay(
+    placed: PlacedOrder,
+    customer: CheckoutCustomerInput,
+    sessionId: string,
+  ) {
     if (!Razorpay || !placed.payment) {
       toast.error("Online payment is unavailable right now. Please try again in a moment.");
       setPlacing(false);
       return;
     }
+    // Dismiss / failure → release the hold + cancel the unpaid order at once,
+    // so other customers see the piece available again immediately. Idempotent.
+    const releaseHold = () => {
+      void cancelCheckout(authedFetch, sessionId).catch(() => {});
+    };
     const options: RazorpayOrderOptions = {
       key: placed.payment.razorpayKeyId,
       amount: placed.payment.amountPaise,
@@ -142,15 +156,15 @@ export function useCheckout() {
       modal: {
         ondismiss: () => {
           setPlacing(false);
-          toast.message(
-            "Payment cancelled — your order is saved as pending. You can retry from My Orders.",
-          );
+          releaseHold();
+          toast.message("Payment cancelled — your reservation was released.");
         },
       },
     };
     const rzp = new Razorpay(options);
     rzp.on("payment.failed", (r) => {
       setPlacing(false);
+      releaseHold();
       toast.error(r?.error?.description || "Payment failed. Please try again.");
     });
     rzp.open();
@@ -189,7 +203,7 @@ export function useCheckout() {
         finishSuccess(placed.orderNumber, customer.email);
         return;
       }
-      openRazorpay(placed, customer);
+      openRazorpay(placed, customer, sessionId);
     } catch (error) {
       toastApiError(error);
       setPlacing(false);
