@@ -34,23 +34,22 @@ export function youTubeThumb(id: string): string {
 }
 
 /**
- * Embed URL tuned for the silent autoplay reels wall: muted autoplay (browsers
- * block unmuted autoplay), single-video loop (`loop` needs `playlist=<id>`),
- * no controls / keyboard / fullscreen / related videos.
+ * Player vars for the silent reels wall, driven through the YouTube IFrame
+ * Player API. No `loop`/`playlist`: looping is done in JS (replay on the ENDED
+ * event) so the player never enters playlist mode — that mode is what adds the
+ * prev/next buttons. Muted autoplay is mandatory (browsers block sound-on
+ * autoplay); controls/keyboard/fullscreen/related/info are all off. The center
+ * tap overlay that these flags can't kill is suppressed by `pointer-events:none`
+ * on the iframe + the poster cover in `VideoWall`.
  */
-export function youTubeEmbedUrl(id: string): string {
-  const params = new URLSearchParams({
-    autoplay: "1",
-    mute: "1",
-    loop: "1",
-    playlist: id,
-    controls: "0",
-    modestbranding: "1",
-    rel: "0",
-    playsinline: "1",
-    disablekb: "1",
-    fs: "0",
-    iv_load_policy: "3",
-  });
-  return `https://www.youtube-nocookie.com/embed/${id}?${params.toString()}`;
-}
+export const YT_PLAYER_VARS = {
+  autoplay: 1,
+  mute: 1,
+  controls: 0,
+  modestbranding: 1,
+  rel: 0,
+  playsinline: 1,
+  disablekb: 1,
+  fs: 0,
+  iv_load_policy: 3,
+} as const;
