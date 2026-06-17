@@ -769,3 +769,89 @@ export function listCustomers(
     query: { q: params.q, page, page_size: pageSize },
   }).then((p) => mapPage(p, mapCustomerItem, { page, pageSize }));
 }
+
+// ============================ Videos ============================
+
+export interface AdminVideo {
+  id: string;
+  /** Canonical 11-char YouTube id. */
+  youtubeId: string;
+  title: string | null;
+  /** Optional "shop this look" destination. */
+  linkUrl: string | null;
+  displayOrder: number;
+  isActive: boolean;
+  updatedAt: string;
+}
+
+function mapVideo(d: Dict): AdminVideo {
+  return {
+    id: s(d.id),
+    youtubeId: s(d.youtube_id),
+    title: sn(d.title),
+    linkUrl: sn(d.link_url),
+    displayOrder: Number(d.display_order ?? 0),
+    isActive: Boolean(d.is_active),
+    updatedAt: s(d.updated_at),
+  };
+}
+
+/** All videos (active + hidden), in display order. */
+export function listVideos(af: AuthedFetch): Promise<AdminVideo[]> {
+  return af<Dict[]>("/admin/videos").then((rows) => (rows ?? []).map(mapVideo));
+}
+
+export interface VideoCreateBody {
+  /** A YouTube watch / youtu.be / Shorts / embed URL, or a bare 11-char id. */
+  url: string;
+  title?: string;
+  linkUrl?: string;
+  displayOrder?: number;
+  isActive?: boolean;
+}
+
+export function createVideo(af: AuthedFetch, body: VideoCreateBody): Promise<AdminVideo> {
+  return af<Dict>("/admin/videos", {
+    method: "POST",
+    body: {
+      url: body.url,
+      title: body.title?.trim() || undefined,
+      link_url: body.linkUrl?.trim() || undefined,
+      display_order: body.displayOrder,
+      is_active: body.isActive,
+    },
+  }).then(mapVideo);
+}
+
+export interface VideoUpdateBody {
+  url?: string;
+  title?: string | null;
+  linkUrl?: string | null;
+  isActive?: boolean;
+}
+
+/** Partial update. `displayOrder` moves via `reorderVideo`, not here. */
+export function updateVideo(
+  af: AuthedFetch,
+  id: string,
+  patch: VideoUpdateBody,
+): Promise<AdminVideo> {
+  const body: Record<string, unknown> = {};
+  if (patch.url !== undefined) body.url = patch.url;
+  if (patch.title !== undefined) body.title = patch.title;
+  if (patch.linkUrl !== undefined) body.link_url = patch.linkUrl;
+  if (patch.isActive !== undefined) body.is_active = patch.isActive;
+  return af<Dict>(`/admin/videos/${id}`, { method: "PATCH", body }).then(mapVideo);
+}
+
+/** Set a video's position in the wall. */
+export function reorderVideo(af: AuthedFetch, id: string, displayOrder: number): Promise<AdminVideo> {
+  return af<Dict>(`/admin/videos/${id}/order`, {
+    method: "PUT",
+    body: { display_order: displayOrder },
+  }).then(mapVideo);
+}
+
+export function deleteVideo(af: AuthedFetch, id: string): Promise<void> {
+  return af<void>(`/admin/videos/${id}`, { method: "DELETE" }).then(() => undefined);
+}

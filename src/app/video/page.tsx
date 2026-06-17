@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import { Play } from "lucide-react";
 import { Navbar } from "@/features/navbar";
 import { PageHeader } from "@/components/shared/page-header";
-import { siteConfig, videoGallery } from "@/config/site";
+import { VideoWall } from "@/features/video/video-wall";
+import { siteConfig } from "@/config/site";
+import { listVideos } from "@/lib/api/videos";
+
+// ISR: cached + revalidated, bustable on-demand via revalidateTag("videos").
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Video",
@@ -10,8 +15,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/video" },
 };
 
-export default function VideoPage() {
-  const hasVideos = videoGallery.length > 0;
+export default async function VideoPage() {
+  const videos = await listVideos();
+  const hasVideos = videos.length > 0;
 
   return (
     <>
@@ -24,28 +30,7 @@ export default function VideoPage() {
         />
 
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
-          {hasVideos && (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {videoGallery.map((video) => (
-                <figure key={video.id} className="overflow-hidden rounded-2xl border border-border-default/50 bg-bg-card shadow-sm">
-                  <div className="aspect-video w-full bg-bg-secondary">
-                    <iframe
-                      className="h-full w-full"
-                      src={`https://www.youtube-nocookie.com/embed/${video.id}`}
-                      title={video.title}
-                      loading="lazy"
-                      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      referrerPolicy="strict-origin-when-cross-origin"
-                      allowFullScreen
-                    />
-                  </div>
-                  <figcaption className="px-5 py-4 font-display text-base text-text-primary">
-                    {video.title}
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-          )}
+          {hasVideos && <VideoWall videos={videos} />}
 
           {/* Channel CTA — the hero of the page until featured films are added. */}
           <div className={hasVideos ? "mt-12" : ""}>

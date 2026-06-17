@@ -69,12 +69,14 @@ export type SiteConfig = typeof siteConfig;
 export interface VideoItem {
   /** YouTube video ID (the part after `watch?v=`). */
   id: string;
-  title: string;
+  title?: string;
+  /** Optional "shop this look" destination. */
+  linkUrl?: string;
 }
 
 /**
- * Featured films for the `/video` page. Populate with real YouTube video IDs
- * to render an embed grid; until then the page links out to the channel
- * (`siteConfig.social.youtube`). Intentionally empty — no placeholder IDs.
+ * Static fallback for the `/video` page. The wall is normally admin-managed via
+ * the backend (`/videos`); this list is rendered only when the API is
+ * unreachable or mock mode is on. Intentionally empty — no placeholder IDs.
  */
 export const videoGallery: VideoItem[] = [];
