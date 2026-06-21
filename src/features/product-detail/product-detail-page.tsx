@@ -88,7 +88,12 @@ export function ProductDetailPage({
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [stickyVisible, setStickyVisible] = useState(false);
-  const [adding, setAdding] = useState(false);
+  // `buying` = a Buy Now reserve→checkout round-trip is in flight (blocks the
+  // CTAs until we know the item is reserved). `justAdded` = a brief "Added ✓"
+  // acknowledgment for the optimistic Add to Cart (not tied to the round-trip).
+  const [buying, setBuying] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
+  const addedFlashRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
 
   const { addItem } = useCart();
@@ -137,22 +142,41 @@ export function ProductDetailPage({
       toast.error(outOfStock ? "This piece just sold out." : "Please select your options.");
       return;
     }
-    setAdding(true);
-    try {
-      await addItem({
-        variantId: variant.id,
-        productId: product.id,
-        slug: product.slug,
-        title: product.name,
-        variantLabel: variant.title,
-        image: { url: product.images[0] ?? PLACEHOLDER_IMAGE, alt: product.name },
-        unitPrice: variant.price || product.price,
-        quantity: qty,
-      });
-      if (buyNow) requireAuth("/checkout");
-    } finally {
-      setAdding(false);
+    if (buying || justAdded) return; // guard against double-submit
+    const input = {
+      variantId: variant.id,
+      productId: product.id,
+      slug: product.slug,
+      title: product.name,
+      variantLabel: variant.title,
+      image: { url: product.images[0] ?? PLACEHOLDER_IMAGE, alt: product.name },
+      unitPrice: variant.price || product.price,
+      quantity: qty,
+    };
+
+    if (buyNow) {
+      // Reserve-before-checkout: the line must exist before routing to /checkout
+      // (an empty cart renders the empty-checkout state). The button
+      // acknowledges the click instantly via `buying`; we await the add and
+      // navigate ONLY on success, so the user never lands on an empty/broken
+      // checkout. The reservation guarantee is preserved.
+      setBuying(true);
+      try {
+        const ok = await addItem(input);
+        if (ok) requireAuth("/checkout");
+      } finally {
+        setBuying(false);
+      }
+      return;
     }
+
+    // Add to Cart: optimistic. addItem updates the cart + badge instantly (and
+    // rolls back + shows an error toast on failure), so fire it in the
+    // background and give an immediate "Added ✓" acknowledgment on the button.
+    void addItem(input);
+    setJustAdded(true);
+    if (addedFlashRef.current) clearTimeout(addedFlashRef.current);
+    addedFlashRef.current = setTimeout(() => setJustAdded(false), 1400);
   }
 
   // Category linking comes from the server (which knows the product's real
@@ -167,6 +191,11 @@ export function ProductDetailPage({
     similar ?? withHref(SIMILAR_PRODUCTS, resolvedProduct.categorySlug);
   const ymalProducts =
     youMayAlsoLike ?? withHref(YMAL_PRODUCTS, resolvedProduct.categorySlug);
+
+  /* Clear the "Added ✓" flash timer on unmount. */
+  useEffect(() => () => {
+    if (addedFlashRef.current) clearTimeout(addedFlashRef.current);
+  }, []);
 
   /* Show sticky header once the buy zone scrolls out of view */
   useEffect(() => {
@@ -195,7 +224,7 @@ export function ProductDetailPage({
         onColorChange={handleColorChange}
         onFabricChange={handleFabricChange}
         onAddToCart={() => handleAddToCart(false)}
-        adding={adding}
+        adding={buying || justAdded}
         canBuy={canBuy}
       />
 
@@ -228,7 +257,8 @@ export function ProductDetailPage({
                 onQuantityChange={setQuantity}
                 onAddToCart={() => handleAddToCart(false)}
                 onBuyNow={() => handleAddToCart(true)}
-                adding={adding}
+                buying={buying}
+                justAdded={justAdded}
                 canBuy={canBuy}
                 outOfStock={outOfStock}
               />

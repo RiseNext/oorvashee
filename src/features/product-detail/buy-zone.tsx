@@ -123,7 +123,10 @@ export interface BuyZoneProps {
   onQuantityChange: (q: number) => void;
   onAddToCart?: () => void;
   onBuyNow?: () => void;
-  adding?: boolean;
+  /** A Buy Now reserve→checkout round-trip is in flight. */
+  buying?: boolean;
+  /** Brief post-add acknowledgment for the optimistic Add to Cart. */
+  justAdded?: boolean;
   canBuy?: boolean;
   outOfStock?: boolean;
 }
@@ -143,10 +146,14 @@ export function BuyZone({
   onQuantityChange,
   onAddToCart,
   onBuyNow,
-  adding = false,
+  buying = false,
+  justAdded = false,
   canBuy = true,
   outOfStock = false,
 }: BuyZoneProps) {
+  // Either CTA being in progress disables both, so a click can't double-fire or
+  // race a reservation. `justAdded` is the short Add to Cart success flash.
+  const busy = buying || justAdded;
   // Clamp the stepper to the backend-derived available_quantity. Undefined ⇒
   // no client limit (legacy/mock). The backend remains the source of truth;
   // these limits are UX only.
@@ -432,7 +439,8 @@ export function BuyZone({
         <button
           type="button"
           onClick={onAddToCart}
-          disabled={adding || !canBuy}
+          disabled={busy || !canBuy}
+          aria-live="polite"
           className={cn(
             "h-12 flex-1 rounded-full border-2 border-text-primary font-body text-sm font-semibold uppercase tracking-[0.1em] text-text-primary",
             "transition-colors duration-200 hover:bg-text-primary hover:text-white",
@@ -440,12 +448,13 @@ export function BuyZone({
             "disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-text-primary",
           )}
         >
-          {outOfStock ? "Sold Out" : adding ? "Adding…" : "Add to Cart"}
+          {outOfStock ? "Sold Out" : justAdded ? "Added ✓" : "Add to Cart"}
         </button>
         <button
           type="button"
           onClick={onBuyNow}
-          disabled={adding || !canBuy}
+          disabled={busy || !canBuy}
+          aria-live="polite"
           className={cn(
             "h-12 flex-1 rounded-full bg-text-primary font-body text-sm font-semibold uppercase tracking-[0.1em] text-white",
             "transition-colors duration-200 hover:bg-bg-dark",
@@ -453,7 +462,7 @@ export function BuyZone({
             "disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-text-primary",
           )}
         >
-          Buy It Now
+          {buying ? "Processing…" : "Buy It Now"}
         </button>
       </div>
     </div>

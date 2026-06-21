@@ -102,11 +102,25 @@ export function useCart() {
   );
 
   // --- server mutations ---------------------------------------------------
+  // Optimistic add: insert the line into the cache immediately so the cart
+  // badge/drawer reflect the click instantly, then reconcile from the
+  // authoritative server cart (or roll back on failure). Mirrors the optimistic
+  // pattern already used by updateMut/removeMut below.
   const addMut = useMutation({
-    mutationFn: (v: { variantId: string; quantity: number }) =>
-      cartApi.addCartItem(authedFetch, v.variantId, v.quantity),
+    mutationFn: (input: AddToCartInput) =>
+      cartApi.addCartItem(authedFetch, input.variantId, input.quantity ?? 1),
+    onMutate: async (input) => {
+      await qc.cancelQueries({ queryKey: CART_QUERY_KEY });
+      const prev = qc.getQueryData<Cart>(CART_QUERY_KEY);
+      setServerCart(insertLine(prev ?? EMPTY_CART, input));
+      toast.success("Added to bag");
+      return { prev };
+    },
+    onError: (e, _input, ctx) => {
+      if (ctx?.prev) setServerCart(ctx.prev);
+      toastApiError(e);
+    },
     onSuccess: setServerCart,
-    onError: (e) => toastApiError(e),
   });
 
   // Optimistic quantity change — feels instant, reconciles from the response.
@@ -157,28 +171,34 @@ export function useCart() {
 
   // --- unified actions ----------------------------------------------------
   const addItem = useCallback(
-    async (input: AddToCartInput) => {
-      const quantity = input.quantity ?? 1;
-      try {
-        if (authed) {
-          await addMut.mutateAsync({ variantId: input.variantId, quantity });
-        } else {
-          addLine({
-            productId: input.productId,
-            variantId: input.variantId,
-            slug: input.slug,
-            title: input.title,
-            variantTitle: input.variantLabel,
-            image: input.image,
-            unitPrice: input.unitPrice,
-            quantity,
-            maxQuantity: input.maxQuantity,
-          });
+    async (input: AddToCartInput): Promise<boolean> => {
+      if (authed) {
+        // The optimistic insert + success toast fire synchronously in
+        // addMut.onMutate, so the UI acknowledges the click instantly. We await
+        // only to learn the real outcome — the Buy Now path needs this to honour
+        // its reserve-before-checkout guarantee. onError has already rolled back
+        // and toasted on failure, so a thrown error just means "not added".
+        try {
+          await addMut.mutateAsync(input);
+          return true;
+        } catch {
+          return false;
         }
-        toast.success("Added to bag");
-      } catch {
-        /* toastApiError already fired in onError */
       }
+      // Guests use the local (synchronous) cart — already instant.
+      addLine({
+        productId: input.productId,
+        variantId: input.variantId,
+        slug: input.slug,
+        title: input.title,
+        variantTitle: input.variantLabel,
+        image: input.image,
+        unitPrice: input.unitPrice,
+        quantity: input.quantity ?? 1,
+        maxQuantity: input.maxQuantity,
+      });
+      toast.success("Added to bag");
+      return true;
     },
     [authed, addMut, addLine],
   );
@@ -226,6 +246,37 @@ export function useCart() {
 }
 
 // --- pure cache transforms (optimistic) -----------------------------------
+// Insert (or merge by variant) an optimistic line. The id is a sentinel that is
+// replaced when the authoritative server cart comes back from the response.
+function insertLine(cart: Cart, input: AddToCartInput): Cart {
+  const quantity = input.quantity ?? 1;
+  const existing = cart.items.find((i) => i.variantId === input.variantId);
+  const items: CartItem[] = existing
+    ? cart.items.map((i) =>
+        i.variantId === input.variantId
+          ? { ...i, quantity: i.quantity + quantity, lineTotal: i.unitPrice * (i.quantity + quantity) }
+          : i,
+      )
+    : [
+        ...cart.items,
+        {
+          id: `optimistic:${input.variantId}`,
+          variantId: input.variantId,
+          productId: input.productId,
+          slug: input.slug,
+          title: input.title,
+          variantLabel: input.variantLabel,
+          image: input.image,
+          unitPrice: input.unitPrice,
+          quantity,
+          lineTotal: input.unitPrice * quantity,
+          available: true,
+          maxQuantity: input.maxQuantity ?? 99,
+        },
+      ];
+  return recount({ ...cart, items });
+}
+
 function applyQty(cart: Cart, itemId: string, quantity: number): Cart {
   const items = cart.items.map((i) =>
     i.id === itemId ? { ...i, quantity, lineTotal: i.unitPrice * quantity } : i,
