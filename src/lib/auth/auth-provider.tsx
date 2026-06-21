@@ -36,6 +36,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <ClerkProvider
       publishableKey={CLERK_PUBLISHABLE_KEY}
+      // The app uses ONLY Clerk Control Components (the `useAuth`/`useUser`/
+      // `useSignIn`/`useSignUp` hooks + our own custom sign-in/up UI) — never a
+      // Clerk-rendered UI component (UserButton/SignIn/UserProfile). That's the
+      // documented precondition for the "headless" clerk-js variant, which loads
+      // a minimal bundle and drops the ~128KB UI chunk that otherwise parses/
+      // executes on the main thread on every page (incl. the public home, where
+      // there's no auth UI above the fold) — the home LCP render-delay culprit.
+      clerkJSVariant="headless"
       appearance={appearance}
       signInUrl={SIGN_IN_URL}
       signUpUrl={SIGN_UP_URL}
