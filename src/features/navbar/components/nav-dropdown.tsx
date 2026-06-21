@@ -98,7 +98,6 @@ export function NavDropdown({ item, triggerClassName }: NavDropdownProps) {
                   render={
                     <Link
                       href={leaf.href}
-                      prefetch={false}
                       className={leafLinkClass}
                     />
                   }
@@ -118,7 +117,6 @@ export function NavDropdown({ item, triggerClassName }: NavDropdownProps) {
                 render={
                   <Link
                     href={child.href}
-                    prefetch={false}
                     className={leafLinkClass}
                   />
                 }
@@ -145,7 +143,6 @@ function DropdownGroup({
     <div className={cn(!isFirst && "mt-1.5 border-t border-border-light/50 pt-1.5")}>
       <Link
         href={group.href}
-        prefetch={false}
         className="block rounded-lg px-4 pb-1 pt-1.5 font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-text-muted transition-colors duration-200 hover:text-gold focus:text-gold focus:outline-none"
       >
         {group.label}
@@ -156,7 +153,6 @@ function DropdownGroup({
           render={
             <Link
               href={leaf.href}
-              prefetch={false}
               className={leafLinkClass}
             />
           }
