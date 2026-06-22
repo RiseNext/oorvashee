@@ -1,4 +1,4 @@
-import { clientEnv } from "@/lib/env";
+import { clientEnv, serverEnv } from "@/lib/env";
 import { ApiError } from "./errors";
 
 type QueryValue =
@@ -34,8 +34,30 @@ export type RequestOptions = Omit<RequestInit, "body"> & {
  */
 export type AuthedFetch = <T>(path: string, options?: RequestOptions) => Promise<T>;
 
+/**
+ * The API origin to hit, chosen at call time by execution context:
+ *
+ *   - SERVER (SSR/ISR/RSC, `typeof window === "undefined"`): hit Railway
+ *     DIRECTLY via the server-only `BACKEND_ORIGIN` — identical to today, so
+ *     there is no self-hop through the public domain and no build-time
+ *     dependency on oorvashee.com resolving.
+ *   - BROWSER: use the same-origin `NEXT_PUBLIC_API_BASE_URL`
+ *     (https://oorvashee.com/api/v1) so the browser never resolves railway.app —
+ *     Reliance Jio's DNS NXDOMAINs `*.up.railway.app`. The next.config rewrite
+ *     proxies `/api/v1/*` to Railway server-side, preserving auth headers.
+ *
+ * Both bases already include the `/api/v1` prefix, so request paths are relative
+ * to it exactly as before.
+ */
+function apiBase(): string {
+  if (typeof window === "undefined") {
+    return `${serverEnv.BACKEND_ORIGIN.replace(/\/$/, "")}/api/v1`;
+  }
+  return clientEnv.NEXT_PUBLIC_API_BASE_URL.replace(/\/$/, "");
+}
+
 function buildUrl(path: string, query?: RequestOptions["query"]) {
-  const base = clientEnv.NEXT_PUBLIC_API_BASE_URL.replace(/\/$/, "");
+  const base = apiBase();
   const url = new URL(`${base}${path.startsWith("/") ? path : `/${path}`}`);
   if (query) {
     for (const [key, value] of Object.entries(query)) {

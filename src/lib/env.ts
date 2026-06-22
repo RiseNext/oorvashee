@@ -5,6 +5,14 @@ const serverSchema = z.object({
   RAZORPAY_KEY_SECRET: z.string().optional(),
   // Clerk server secret (F2). Required at runtime only when auth is enabled.
   CLERK_SECRET_KEY: z.string().optional(),
+  // Backend origin for SERVER-side fetches (SSR/ISR/RSC). These hit Railway
+  // DIRECTLY — exactly as today — so there is no self-hop through the public
+  // domain and no build-time dependency on oorvashee.com resolving. NO `/api/v1`
+  // suffix here; buildUrl appends it. The BROWSER does NOT use this — it goes
+  // same-origin via NEXT_PUBLIC_API_BASE_URL + the next.config rewrite, so it
+  // never resolves railway.app (Jio NXDOMAINs `*.up.railway.app`). Set in Vercel
+  // to https://oorvashee-backend-production.up.railway.app.
+  BACKEND_ORIGIN: z.string().url().default("http://localhost:8000"),
 });
 
 const clientSchema = z.object({
@@ -57,5 +65,6 @@ export const serverEnv =
         NODE_ENV: process.env.NODE_ENV,
         RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
         CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
+        BACKEND_ORIGIN: process.env.BACKEND_ORIGIN,
       })
     : (undefined as never);

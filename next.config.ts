@@ -27,6 +27,25 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "fastly.picsum.photos" },
     ],
   },
+  async rewrites() {
+    // Jio NXDOMAIN fix: browser API calls go to THIS site's own origin
+    // (`/api/v1/*`) and are proxied server-side to Railway, so the browser never
+    // resolves `*.up.railway.app` (Reliance Jio's DNS returns NXDOMAIN for it,
+    // breaking Add to Cart / Buy Now for Jio users). Server-side fetches bypass
+    // this entirely — they hit `BACKEND_ORIGIN` directly (see lib/api/client.ts).
+    //
+    // CRITICAL: scoped to `/api/v1/:path*`, NOT `/api/:path*`, so the local
+    // `/api/revalidate` route handler is untouched. The `/api/v1` prefix is
+    // preserved end-to-end to match the backend's route structure
+    // (FastAPI mounts every router under `/api/v1`).
+    const backendOrigin = process.env.BACKEND_ORIGIN ?? "http://localhost:8000";
+    return [
+      {
+        source: "/api/v1/:path*",
+        destination: `${backendOrigin}/api/v1/:path*`,
+      },
+    ];
+  },
   async redirects() {
     // The canonical product URL is `/product/[slug]` (the WhatsApp/Instagram
     // bot URL contract). Legacy/demo product-detail paths that used to live
