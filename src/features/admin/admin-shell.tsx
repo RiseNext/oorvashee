@@ -10,6 +10,7 @@ import {
   Boxes,
   FolderTree,
   Users,
+  Truck,
   FileText,
   Video,
   Store,
@@ -27,6 +28,7 @@ const NAV = [
   { href: "/admin/inventory", label: "Inventory", icon: Boxes, exact: false },
   { href: "/admin/categories", label: "Categories", icon: FolderTree, exact: false },
   { href: "/admin/customers", label: "Customers", icon: Users, exact: false },
+  { href: "/admin/couriers", label: "Couriers", icon: Truck, exact: false },
   { href: "/admin/videos", label: "Videos", icon: Video, exact: false },
   { href: "/admin/policies", label: "Policies", icon: FileText, exact: false },
 ] as const;

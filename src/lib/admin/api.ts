@@ -855,3 +855,33 @@ export function reorderVideo(af: AuthedFetch, id: string, displayOrder: number):
 export function deleteVideo(af: AuthedFetch, id: string): Promise<void> {
   return af<void>(`/admin/videos/${id}`, { method: "DELETE" }).then(() => undefined);
 }
+
+// ============================ Couriers ============================
+// Manage who has the courier (dispatch) role. Grant/revoke write the user's
+// Clerk role server-side; the courier API + /courier page enforce it.
+
+export interface AdminCourier {
+  /** Clerk user id. */
+  id: string;
+  email: string | null;
+  fullName: string | null;
+}
+
+function mapCourier(d: Dict): AdminCourier {
+  return { id: s(d.id), email: sn(d.email), fullName: sn(d.full_name) };
+}
+
+/** Users who currently have courier access. */
+export function listCouriers(af: AuthedFetch): Promise<AdminCourier[]> {
+  return af<Dict[]>("/admin/couriers").then((rows) => (rows ?? []).map(mapCourier));
+}
+
+/** Grant courier access to a signed-up user by email. */
+export function grantCourier(af: AuthedFetch, email: string): Promise<AdminCourier> {
+  return af<Dict>("/admin/couriers/grant", { method: "POST", body: { email } }).then(mapCourier);
+}
+
+/** Revoke courier access by email (reverts the user to customer). */
+export function revokeCourier(af: AuthedFetch, email: string): Promise<void> {
+  return af<void>("/admin/couriers/revoke", { method: "POST", body: { email } }).then(() => undefined);
+}
