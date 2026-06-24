@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { UploadCloud, X, Loader2 } from "lucide-react";
+import { UploadCloud, X, Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
 
 import { useApiClient } from "@/hooks/use-api-client";
@@ -35,6 +35,7 @@ export function ProductMedia({
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   async function upload(files: FileList | null) {
     if (!files || files.length === 0 || uploading) return;
@@ -133,6 +134,22 @@ export function ProductMedia({
             {uploading ? "Uploading…" : "Drop or click"}
           </span>
         </button>
+
+        {/* Capture tile — opens the phone's rear camera (capture="environment")
+            on mobile; on desktop it gracefully falls back to the file picker.
+            Reuses the EXACT same upload() path (compress → sign → Cloudinary →
+            attach) as file upload, so the stored image + security are identical. */}
+        <button
+          type="button"
+          aria-label="Take a photo with the camera"
+          onClick={() => cameraInputRef.current?.click()}
+          className="flex aspect-[4/5] flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-default text-text-muted transition-colors hover:border-cta-fill hover:text-cta-fill"
+        >
+          {uploading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Camera className="h-6 w-6" />}
+          <span className="px-2 text-center font-body text-[11px]">
+            {uploading ? "Uploading…" : "Take photo"}
+          </span>
+        </button>
       </div>
 
       <input
@@ -140,6 +157,17 @@ export function ProductMedia({
         type="file"
         accept="image/*"
         multiple
+        hidden
+        onChange={(e) => upload(e.target.files)}
+      />
+
+      {/* Camera input: single shot from the device camera on mobile. Same
+          onChange → upload() handler as the file picker above. */}
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
         hidden
         onChange={(e) => upload(e.target.files)}
       />
