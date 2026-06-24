@@ -13,6 +13,8 @@ const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 // protected API call (the real security boundary). Only the internal admin
 // area is gated at the edge.
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
+// The courier (delivery-partner) portal — gated to the `courier` role only.
+const isCourierRoute = createRouteMatcher(["/courier(.*)"]);
 
 /** Role lives in the customised session token (`role` or `*_metadata.role`). */
 function extractRole(claims: Record<string, unknown> | null | undefined): string {
@@ -33,6 +35,16 @@ const handler = CLERK_ENABLED
         if (extractRole(sessionClaims as Record<string, unknown>) !== "admin") {
           // Authenticated but not an admin → bounce home (defence in depth;
           // the backend independently enforces 403 on /admin APIs).
+          return NextResponse.redirect(new URL("/", req.url));
+        }
+      }
+      if (isCourierRoute(req)) {
+        // Same edge pattern as /admin: require auth, then the courier role.
+        // The backend independently enforces require_role("courier") on every
+        // /courier API call — this is just the edge defence-in-depth bounce.
+        await auth.protect();
+        const { sessionClaims } = await auth();
+        if (extractRole(sessionClaims as Record<string, unknown>) !== "courier") {
           return NextResponse.redirect(new URL("/", req.url));
         }
       }
