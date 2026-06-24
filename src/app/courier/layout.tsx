@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { UserButton } from "@clerk/nextjs";
+import { CourierSignOut } from "./sign-out-button";
 
 // Courier portal chrome. Self-contained (no storefront navbar/footer) and
 // noindex — this is an internal operations surface, edge-gated to the courier
@@ -22,7 +22,7 @@ export default function CourierLayout({ children }: { children: React.ReactNode 
               Delivery partner portal
             </p>
           </div>
-          <UserButton afterSignOutUrl="/" />
+          <CourierSignOut />
         </div>
       </header>
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">{children}</main>
