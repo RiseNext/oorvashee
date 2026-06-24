@@ -53,7 +53,7 @@ function OrderDetail({ order }: { order: AdminOrderDetail }) {
 
   const packed = useMutation({
     mutationFn: () => admin.markPacked(authedFetch, id),
-    onSuccess: (o) => { set(o); toast.success("Marked packed"); },
+    onSuccess: (o) => { set(o); toast.success("Marked ready for dispatch"); },
     onError: (e) => toastApiError(e),
   });
   const shipped = useMutation({
@@ -93,7 +93,8 @@ function OrderDetail({ order }: { order: AdminOrderDetail }) {
           <StatusBadge label={order.paymentStatus} tone={statusTone(order.paymentStatus)} />
         </div>
         <div className="flex flex-wrap gap-2">
-          {order.status === "placed" && <Action label="Mark packed" onClick={() => packed.mutate()} pending={packed.isPending} />}
+          {/* "Packed" status === Ready for Dispatch — this is what the courier portal reads. */}
+          {order.status === "placed" && <Action label="Mark ready for dispatch" onClick={() => packed.mutate()} pending={packed.isPending} />}
           {order.status === "packed" && <Action label="Mark shipped" onClick={() => setShowShip((v) => !v)} />}
           {order.status === "shipped" && <Action label="Mark delivered" onClick={() => delivered.mutate()} pending={delivered.isPending} />}
           {order.paymentMethod === "cod" && order.paymentStatus === "cod_pending" && (
