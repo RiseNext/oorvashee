@@ -39,12 +39,14 @@ const handler = CLERK_ENABLED
         }
       }
       if (isCourierRoute(req)) {
-        // Same edge pattern as /admin: require auth, then the courier role.
-        // The backend independently enforces require_role("courier") on every
-        // /courier API call — this is just the edge defence-in-depth bounce.
+        // Same edge pattern as /admin: require auth, then the role. The dispatch
+        // board is open to couriers AND admins (admins have full access); the
+        // backend independently enforces require_role("courier", "admin") on
+        // every /courier API call — this is just the edge defence-in-depth bounce.
         await auth.protect();
         const { sessionClaims } = await auth();
-        if (extractRole(sessionClaims as Record<string, unknown>) !== "courier") {
+        const role = extractRole(sessionClaims as Record<string, unknown>);
+        if (role !== "courier" && role !== "admin") {
           return NextResponse.redirect(new URL("/", req.url));
         }
       }
