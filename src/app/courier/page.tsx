@@ -17,7 +17,7 @@ import { useApiClient } from "@/hooks/use-api-client";
 import * as courier from "@/lib/courier/api";
 import { toastApiError } from "@/lib/api/toast";
 import { cn } from "@/lib/utils";
-import type { CourierOrder } from "@/types/courier";
+import type { CourierOrder, CourierVendor } from "@/types/courier";
 
 const QK = ["courier-orders"] as const;
 
@@ -26,6 +26,12 @@ export default function CourierPage() {
   const query = useQuery({
     queryKey: QK,
     queryFn: () => courier.listDispatchOrders(authedFetch),
+  });
+  // Carriers for the AWB dropdown — fetched once (backend calls Daakia + caches).
+  const vendorsQuery = useQuery({
+    queryKey: ["courier-vendors"],
+    queryFn: () => courier.listVendors(authedFetch),
+    staleTime: 10 * 60 * 1000,
   });
 
   const counts = useMemo(() => {
@@ -84,7 +90,12 @@ export default function CourierPage() {
       ) : (
         <ul className="space-y-3">
           {orders.map((o) => (
-            <OrderCard key={o.orderNumber} order={o} />
+            <OrderCard
+              key={o.orderNumber}
+              order={o}
+              vendors={vendorsQuery.data ?? []}
+              vendorsError={vendorsQuery.isError}
+            />
           ))}
         </ul>
       )}
@@ -92,13 +103,31 @@ export default function CourierPage() {
   );
 }
 
-function OrderCard({ order }: { order: CourierOrder }) {
+function OrderCard({
+  order,
+  vendors,
+  vendorsError,
+}: {
+  order: CourierOrder;
+  vendors: CourierVendor[];
+  vendorsError: boolean;
+}) {
   const { authedFetch } = useApiClient();
   const qc = useQueryClient();
   const [awb, setAwb] = useState("");
+  const [vendorId, setVendorId] = useState<number | "">("");
 
   const save = useMutation({
-    mutationFn: () => courier.setAwb(authedFetch, order.orderNumber, awb.trim()),
+    mutationFn: () => {
+      const vendor = vendors.find((v) => v.vendorId === vendorId);
+      return courier.setAwb(
+        authedFetch,
+        order.orderNumber,
+        awb.trim(),
+        vendorId as number,
+        vendor?.vendorName ?? null,
+      );
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: QK });
       toast.success("AWB saved — order dispatched");
@@ -145,24 +174,47 @@ function OrderCard({ order }: { order: CourierOrder }) {
             {order.courierName ? <span className="text-text-muted">· {order.courierName}</span> : null}
           </p>
         ) : order.isReady ? (
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <input
-              value={awb}
-              onChange={(e) => setAwb(e.target.value)}
-              placeholder="Enter AWB / tracking number"
-              inputMode="text"
-              autoCapitalize="characters"
-              className="w-full rounded-lg border border-border-default bg-white px-3 py-2 font-body text-sm text-text-primary outline-none focus:border-cta-fill"
-            />
-            <button
-              type="button"
-              disabled={save.isPending || awb.trim().length === 0}
-              onClick={() => save.mutate()}
-              className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-text-primary px-5 py-2 font-body text-xs font-semibold uppercase tracking-[0.1em] text-white transition-colors hover:bg-bg-dark disabled:opacity-50"
-            >
-              {save.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-              {save.isPending ? "Saving…" : "Save AWB"}
-            </button>
+          <div className="space-y-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <select
+                value={vendorId}
+                onChange={(e) => setVendorId(e.target.value ? Number(e.target.value) : "")}
+                className="w-full rounded-lg border border-border-default bg-white px-3 py-2 font-body text-sm text-text-primary outline-none focus:border-cta-fill sm:max-w-[44%]"
+              >
+                <option value="">Select carrier…</option>
+                {vendors.map((v) => (
+                  <option key={v.vendorId} value={v.vendorId}>
+                    {v.vendorName ?? `Vendor ${v.vendorId}`}
+                  </option>
+                ))}
+              </select>
+              <input
+                value={awb}
+                onChange={(e) => setAwb(e.target.value)}
+                placeholder="Enter AWB / tracking number"
+                inputMode="text"
+                autoCapitalize="characters"
+                className="w-full rounded-lg border border-border-default bg-white px-3 py-2 font-body text-sm text-text-primary outline-none focus:border-cta-fill"
+              />
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              {vendorsError ? (
+                <span className="font-body text-xs text-badge-text">Couldn&apos;t load carriers — refresh.</span>
+              ) : vendors.length === 0 ? (
+                <span className="font-body text-xs text-text-muted">Loading carriers…</span>
+              ) : (
+                <span />
+              )}
+              <button
+                type="button"
+                disabled={save.isPending || awb.trim().length === 0 || vendorId === ""}
+                onClick={() => save.mutate()}
+                className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-text-primary px-5 py-2 font-body text-xs font-semibold uppercase tracking-[0.1em] text-white transition-colors hover:bg-bg-dark disabled:opacity-50"
+              >
+                {save.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                {save.isPending ? "Saving…" : "Save AWB"}
+              </button>
+            </div>
           </div>
         ) : (
           <p className="font-body text-xs text-text-muted">

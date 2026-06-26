@@ -26,4 +26,12 @@ export interface CourierOrder {
   isReady: boolean;
   awb: string | null;
   courierName: string | null;
+  /** Daakia carrier (vendor) id stored on the shipment. */
+  vendorId: number | null;
+}
+
+/** A Daakia carrier option for the AWB dropdown. */
+export interface CourierVendor {
+  vendorId: number;
+  vendorName: string | null;
 }

@@ -5,7 +5,7 @@
  * otherwise) and only ever returns delivery fields.
  */
 import type { AuthedFetch } from "@/lib/api/client";
-import type { CourierOrder } from "@/types/courier";
+import type { CourierOrder, CourierVendor } from "@/types/courier";
 
 type Dict = Record<string, unknown>;
 const s = (v: unknown): string => (v == null ? "" : String(v));
@@ -31,6 +31,7 @@ function mapOrder(d: Dict): CourierOrder {
     isReady: Boolean(d.is_ready),
     awb: sn(d.awb),
     courierName: sn(d.courier_name),
+    vendorId: d.vendor_id == null ? null : Number(d.vendor_id),
   };
 }
 
@@ -39,15 +40,33 @@ export function listDispatchOrders(af: AuthedFetch): Promise<CourierOrder[]> {
   return af<Dict[]>("/courier/orders").then((rows) => (rows ?? []).map(mapOrder));
 }
 
-/** Set the AWB/tracking number on a Ready order (backend transitions packed → shipped). */
+/** Daakia carriers for the AWB dropdown (backend calls Daakia; cached there). */
+export function listVendors(af: AuthedFetch): Promise<CourierVendor[]> {
+  return af<Dict[]>("/courier/vendors").then((rows) =>
+    (rows ?? []).map((d) => ({
+      vendorId: Number(d.vendor_id),
+      vendorName: sn(d.vendor_name),
+    })),
+  );
+}
+
+/**
+ * Set the AWB + carrier (vendor) on a Ready order. The backend transitions
+ * packed → shipped and stores the vendor so the customer page can track live.
+ */
 export function setAwb(
   af: AuthedFetch,
   orderNumber: string,
   awb: string,
-  courierName?: string,
+  vendorId: number,
+  vendorName?: string | null,
 ): Promise<CourierOrder> {
   return af<Dict>(`/courier/orders/${encodeURIComponent(orderNumber)}/awb`, {
     method: "POST",
-    body: { awb, ...(courierName ? { courier_name: courierName } : {}) },
+    body: {
+      awb,
+      vendor_id: vendorId,
+      ...(vendorName ? { vendor_name: vendorName } : {}),
+    },
   }).then(mapOrder);
 }
