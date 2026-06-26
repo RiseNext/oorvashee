@@ -7,6 +7,7 @@ import { Check, Package, Truck, Home, XCircle } from "lucide-react";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Order, OrderStatus } from "@/types/order";
+import { LiveTracking } from "./live-tracking";
 
 const STEPS: { key: OrderStatus; label: string; icon: typeof Check }[] = [
   { key: "placed", label: "Placed", icon: Check },
@@ -44,7 +45,14 @@ const PAYMENT_COPY: Record<string, string> = {
   refunded: "Refunded",
 };
 
-export function OrderDetailView({ order }: { order: Order }) {
+export function OrderDetailView({
+  order,
+  trackingEmail,
+}: {
+  order: Order;
+  /** Present on the guest tracking page → live tracking uses the email-gated endpoint. */
+  trackingEmail?: string;
+}) {
   const current = ORDER_INDEX[order.status];
   const cancelled = order.status === "cancelled";
 
@@ -120,25 +128,32 @@ export function OrderDetailView({ order }: { order: Order }) {
           ))}
         </ul>
 
-        {/* Shipment */}
+        {/* Shipment (renders instantly from stored data) + live tracking (async) */}
         {order.shipment?.trackingId && (
-          <div className="rounded-xl border border-border-light bg-bg-card p-5">
-            <h3 className="font-body text-sm font-bold uppercase tracking-[0.16em] text-text-primary">
-              Shipment
-            </h3>
-            <p className="mt-2 font-body text-sm text-text-secondary">
-              {order.shipment.courierName ?? "Courier"} · {order.shipment.trackingId}
-            </p>
-            {order.shipment.trackingUrl && (
-              <a
-                href={order.shipment.trackingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-1 inline-block font-body text-sm text-cta-fill underline underline-offset-2"
-              >
-                Track shipment
-              </a>
-            )}
+          <div className="space-y-3">
+            <div className="rounded-xl border border-border-light bg-bg-card p-5">
+              <h3 className="font-body text-sm font-bold uppercase tracking-[0.16em] text-text-primary">
+                Shipment
+              </h3>
+              <p className="mt-2 font-body text-sm text-text-secondary">
+                {order.shipment.courierName ?? "Courier"} · {order.shipment.trackingId}
+              </p>
+              {order.shipment.trackingUrl && (
+                <a
+                  href={order.shipment.trackingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 inline-block font-body text-sm text-cta-fill underline underline-offset-2"
+                >
+                  Track shipment
+                </a>
+              )}
+            </div>
+            <LiveTracking
+              orderNumber={order.orderNumber}
+              email={trackingEmail}
+              trackingUrl={order.shipment.trackingUrl}
+            />
           </div>
         )}
       </div>

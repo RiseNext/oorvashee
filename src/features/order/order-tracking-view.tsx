@@ -73,7 +73,7 @@ export function OrderTrackingView({ orderNumber }: { orderNumber: string }) {
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-cta-fill/30 border-t-cta-fill" />
             </div>
           ) : order ? (
-            <OrderDetailView order={order} />
+            <OrderDetailView order={order} trackingEmail={submitted ?? undefined} />
           ) : null}
         </div>
       </main>

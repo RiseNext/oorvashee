@@ -75,3 +75,22 @@ export interface Order {
   createdAt: string;
   shipment?: OrderShipment;
 }
+
+/** A single Daakia tracking scan/event. */
+export interface TrackingEvent {
+  message: string | null;
+  location: string | null;
+  status: string | null;
+  eventTime: string | null;
+}
+
+/** Live courier tracking (fetched separately from the order, after paint). */
+export interface OrderTracking {
+  awb: string | null;
+  vendorName: string | null;
+  lastStatus: string | null;
+  trackingUrl: string | null;
+  events: TrackingEvent[];
+  /** True when live Daakia data was fetched; false = no awb/vendor or Daakia errored. */
+  available: boolean;
+}
